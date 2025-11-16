@@ -8,6 +8,7 @@ import { storage } from '../utils/storage';
 import Login from '../screens/login';
 import Signup from '../screens/SignUp';
 import BottomTabNavigator from '../components/bottomTabNavigator';
+import FocusScreen from '../screens/focusScreen';
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,7 @@ export default function MainNavigator() {
         <Stack.Screen name="MainApp" component={BottomTabNavigator} />
         <Stack.Screen name="Login" component={Login} options={{ headerTitle: 'Login' }} />
         <Stack.Screen name="Signup" component={Signup} options={{ headerTitle: 'Signup' }} />
+        <Stack.Screen name="Focus" component={FocusScreen} />
       </Stack.Navigator>
     </ThemeProvider>
   );

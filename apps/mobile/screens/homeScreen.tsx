@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Text,
   Alert,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
@@ -159,7 +160,18 @@ export default function HomeScreen({ navigation }: any) {
       <FlatList
         data={feedData}
         renderItem={({ item }) => (
-          <MantraCarousel item={item} onLike={handleLike} onSave={handleSave} />
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() =>
+              navigation.navigate('Focus', {
+                mantra: item,
+                onLike: handleLike,
+                onSave: handleSave,
+              })
+            }
+          >
+            <MantraCarousel item={item} onLike={handleLike} onSave={handleSave} />
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.mantra_id.toString()}
         pagingEnabled

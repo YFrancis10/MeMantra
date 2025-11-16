@@ -9,9 +9,15 @@ interface MantraCarouselProps {
   readonly item: Mantra;
   readonly onLike?: (mantraId: number) => void;
   readonly onSave?: (mantraId: number) => void;
+  readonly showButtons?: boolean;
 }
 
-export default function MantraCarousel({ item, onLike, onSave }: Readonly<MantraCarouselProps>) {
+export default function MantraCarousel({
+  item,
+  onLike,
+  onSave,
+  showButtons = true,
+}: Readonly<MantraCarouselProps>) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Filter out pages with no content
@@ -127,10 +133,12 @@ export default function MantraCarousel({ item, onLike, onSave }: Readonly<Mantra
       </View>
 
       {/* Action buttons */}
-      <View className="absolute right-6 bottom-40 items-center">
-        <IconButton type="save" active={!!item.isSaved} onPress={handleSave} className="mb-6" />
-        <IconButton type="like" active={!!item.isLiked} onPress={handleLike} />
-      </View>
+      {showButtons && (
+        <View className="absolute right-6 bottom-40 items-center">
+          <IconButton type="save" active={!!item.isSaved} onPress={handleSave} className="mb-6" />
+          <IconButton type="like" active={!!item.isLiked} onPress={handleLike} />
+        </View>
+      )}
     </View>
   );
 }
