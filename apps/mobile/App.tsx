@@ -7,8 +7,6 @@ import MainNavigator from './app/index';
 import splashLogo from './assets/logo.png';
 import './global.css';
 
-declare const __DEV__: boolean;
-
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -21,21 +19,12 @@ export default function App() {
 
     async function prepare() {
       try {
-        console.log('In development mode:', __DEV__);
-        if (__DEV__) {
-          console.log('Development mode: Sentry disabled');
-        } else {
-          console.log('Production mode: Initializing Sentry...');
-          const { startPerformanceTracking } = await import('./sentry');
-          startPerformanceTracking();
-        }
-      } catch (e) {
-        console.warn(e);
-      } finally {
         await SplashScreen.hideAsync();
         if (isMounted) {
           setAppIsReady(true);
         }
+      } catch (e) {
+        console.warn(e);
       }
     }
 
