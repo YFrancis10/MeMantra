@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createUserSchema = z.object({
   body: z.object({
     username: z.string().min(3, 'Username must be at least 3 characters').max(50),
-    email: z.string().email({ message: 'Invalid email format' }),
+    email: z.email({ message: 'Invalid email format' }),
     password: z.string().min(8, 'Password must be at least 8 characters'),
   }),
 });
@@ -11,7 +11,7 @@ export const createUserSchema = z.object({
 export const updateUserSchema = z.object({
   body: z.object({
     username: z.string().min(3).max(50).optional(),
-    email: z.string().email({ message: 'Invalid email format' }).optional(),
+    email: z.email({ message: 'Invalid email format' }).optional(),
     password: z.string().min(8).optional(),
   }),
 });
