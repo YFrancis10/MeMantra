@@ -20,7 +20,7 @@ export default function UserForm({
   onSubmit,
   submitting,
   isEdit = false,
-}: UserFormProps) {
+}: Readonly<UserFormProps>) {
   const { colors } = useTheme();
 
   return (

@@ -74,6 +74,7 @@ const AdminScreen: React.FC = () => {
         }
       }
     } catch (error) {
+      console.error('Failed to load ' + mode + ':', error);
       Alert.alert('Error', `Failed to load ${mode}`);
     } finally {
       setLoading(false);
@@ -125,6 +126,7 @@ const AdminScreen: React.FC = () => {
         Alert.alert('Success', 'Mantra created successfully');
       }
     } catch (error) {
+      console.error('Failed to create mantra:', error);
       Alert.alert('Error', 'Failed to create mantra');
     } finally {
       setSubmitting(false);
@@ -148,6 +150,7 @@ const AdminScreen: React.FC = () => {
         Alert.alert('Success', 'Mantra updated successfully');
       }
     } catch (error) {
+      console.error('Failed to update mantra:', error);
       Alert.alert('Error', 'Failed to update mantra');
     } finally {
       setSubmitting(false);
@@ -162,6 +165,7 @@ const AdminScreen: React.FC = () => {
       setMantras(mantras.filter((m) => m.mantra_id !== mantraId));
       Alert.alert('Success', 'Mantra deleted');
     } catch (error) {
+      console.error('Failed to delete mantra:', error);
       Alert.alert('Error', 'Failed to delete mantra');
     } finally {
       setDeletingId(null);

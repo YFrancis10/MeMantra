@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../db';
 
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@memantra.com')
-  .split(',')
-  .map(email => email.trim().toLowerCase());
+const ADMIN_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || 'admin@memantra.com')
+    .split(',')
+    .map(email => email.trim().toLowerCase())
+);
 
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -31,8 +32,8 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
       });
     }
 
-    // Check if user email is in admin list
-    const isAdmin = user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+    // Check if user email is in admin list using Set.has()
+    const isAdmin = user.email && ADMIN_EMAILS.has(user.email.toLowerCase());
 
     if (!isAdmin) {
       return res.status(403).json({

@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-} from 'react-native';
+import { Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 
 interface MantraFormProps {
@@ -33,7 +26,7 @@ export default function MantraForm({
   onSubmit,
   submitting,
   isEdit = false,
-}: MantraFormProps) {
+}: Readonly<MantraFormProps>) {
   const { colors } = useTheme();
 
   return (

@@ -11,7 +11,13 @@ interface UserListProps {
   onDelete: (userId: number, username: string) => void;
 }
 
-export default function UserList({ users, loading, deletingId, onEdit, onDelete }: UserListProps) {
+export default function UserList({
+  users,
+  loading,
+  deletingId,
+  onEdit,
+  onDelete,
+}: Readonly<UserListProps>) {
   const { colors } = useTheme();
 
   if (loading) {

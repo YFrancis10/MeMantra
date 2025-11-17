@@ -17,7 +17,7 @@ export default function MantraList({
   deletingId,
   onEdit,
   onDelete,
-}: MantraListProps) {
+}: Readonly<MantraListProps>) {
   const { colors } = useTheme();
 
   if (loading) {
