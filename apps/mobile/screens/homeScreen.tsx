@@ -27,7 +27,11 @@ export default function HomeScreen({ navigation }: any) {
 
   const loadMantras = async () => {
     try {
-      const token = (await storage.getToken()) || 'mock-token';
+      const token = await storage.getToken();
+      if (!token) {
+        Alert.alert('Error', 'You must be logged in to perform this action.');
+        return;
+      }
       const response = await mantraService.getFeedMantras(token);
 
       if (response.status === 'success') {
@@ -42,7 +46,12 @@ export default function HomeScreen({ navigation }: any) {
 
   const handleLike = async (mantraId: number) => {
     try {
-      const token = (await storage.getToken()) || 'mock-token';
+      const token = await storage.getToken();
+      console.log('Token:', token);
+      if (!token) {
+        Alert.alert('Error', 'You must be logged in to perform this action.');
+        return;
+      }
       const isCurrentlyLiked = feedData.find((m) => m.mantra_id === mantraId)?.isLiked || false;
 
       setFeedData((prev) =>
@@ -65,9 +74,12 @@ export default function HomeScreen({ navigation }: any) {
 
   const handleSave = async (mantraId: number) => {
     try {
-      const token = (await storage.getToken()) || 'mock-token';
+      const token = await storage.getToken();
+      if (!token) {
+        Alert.alert('Error', 'You must be logged in to perform this action.');
+        return;
+      }
       const isCurrentlySaved = feedData.find((m) => m.mantra_id === mantraId)?.isSaved || false;
-
       setFeedData((prev) =>
         prev.map((m) => (m.mantra_id === mantraId ? { ...m, isSaved: !m.isSaved } : m)),
       );
@@ -75,6 +87,7 @@ export default function HomeScreen({ navigation }: any) {
       if (isCurrentlySaved) {
         await mantraService.unsaveMantra(mantraId, token);
       } else {
+        console.log('Saving mantra with ID:', mantraId);
         await mantraService.saveMantra(mantraId, token);
       }
     } catch (err) {

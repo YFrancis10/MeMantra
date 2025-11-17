@@ -288,9 +288,9 @@ const realMantraService = {
   },
 
   async saveMantra(mantraId: number, token: string) {
-    const response = await apiClient.post(
-      `/mantras/save`,
-      { mantra_id: mantraId },
+    const response = await apiClient.put(
+      `/mantras/${mantraId}`,
+      { isSaved: true },
       {
         headers: { Authorization: `Bearer ${token}` },
       },
@@ -299,9 +299,13 @@ const realMantraService = {
   },
 
   async unsaveMantra(mantraId: number, token: string) {
-    const response = await apiClient.delete(`/mantras/save/${mantraId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await apiClient.post(
+      `/mantras/unsave`,
+      { mantra_id: mantraId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     return response.data;
   },
   async createMantra(
