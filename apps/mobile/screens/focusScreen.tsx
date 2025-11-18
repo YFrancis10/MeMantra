@@ -3,6 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
 import { Mantra } from '../services/mantra.service';
+import { useTheme } from '../context/ThemeContext';
 
 export default function FocusScreen({ route, navigation }: any) {
   const { mantra, onLike, onSave } = route.params as {
@@ -11,19 +12,16 @@ export default function FocusScreen({ route, navigation }: any) {
     onSave: (id: number) => void;
   };
 
+  const { colors } = useTheme();
+
   return (
-    <View className="flex-1 bg-[#9AA793]">
+    <View className="flex-1" style={{ backgroundColor: colors.primary }}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        style={{
-          position: 'absolute',
-          top: 60,
-          left: 20,
-          zIndex: 20,
-          padding: 8,
-        }}
+        className="absolute z-20 p-2"
+        style={{ top: 60, left: 20 }}
       >
-        <Ionicons name="chevron-back" size={32} color="white" />
+        <Ionicons name="chevron-back" size={32} color={colors.text} />
       </TouchableOpacity>
 
       <MantraCarousel

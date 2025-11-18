@@ -6,12 +6,14 @@ import { mantraService, Mantra } from '../services/mantra.service';
 import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
+import { useTheme } from '../context/ThemeContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
   const [feedData, setFeedData] = useState<Mantra[]>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
 
   useEffect(() => {
     loadMantras();
@@ -102,9 +104,7 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
-  };
+  const handleSearch = (query: string) => console.log('Searching for:', query);
 
   const handleUserPress = () => {
     Alert.alert(
@@ -112,7 +112,7 @@ export default function HomeScreen({ navigation }: any) {
       'Are you sure you want to log out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Log out', style: 'destructive', onPress: () => void handleLogout() },
+        { text: 'Log out', style: 'destructive', onPress: handleLogout },
       ],
       { cancelable: true },
     );
@@ -120,15 +120,21 @@ export default function HomeScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-[#9AA793] justify-center items-center">
-        <ActivityIndicator size="large" color="#E6D29C" />
-        <Text className="text-white mt-4 text-base">Loading mantras...</Text>
+      <View
+        className="flex-1 justify-center items-center"
+        style={{ backgroundColor: colors.primary }}
+      >
+        <ActivityIndicator size="large" color={colors.secondary} />
+        <Text style={{ color: colors.text }} className="mt-4 text-base">
+          {' '}
+          Loading mantras...{' '}
+        </Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-[#9AA793]">
+    <View className="flex-1" style={{ backgroundColor: colors.primary }}>
       {/* Header */}
       <View className="absolute top-5 left-0 right-0 z-10 flex-row justify-between items-center px-6 pt-14 pb-4">
         <SearchBar onSearch={handleSearch} placeholder="Search mantras..." />
@@ -153,8 +159,8 @@ export default function HomeScreen({ navigation }: any) {
         )}
         keyExtractor={(item) => item.mantra_id.toString()}
         pagingEnabled
-        snapToAlignment="start"
         showsVerticalScrollIndicator={false}
+        snapToAlignment="start"
         decelerationRate="fast"
         snapToInterval={SCREEN_HEIGHT}
       />

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Mantra } from '../services/mantra.service';
 import IconButton from '../components/UI/iconButton';
+import { useTheme } from '../context/ThemeContext';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ export default function MantraCarousel({
   onPress,
 }: Readonly<MantraCarouselProps>) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { colors } = useTheme();
 
   const pages = [
     { title: 'Mantra', content: item.title },
@@ -62,10 +64,12 @@ export default function MantraCarousel({
   return (
     <View
       style={{ height: SCREEN_HEIGHT, width: SCREEN_WIDTH }}
-      className="justify-center items-center bg-[#9AA793]"
+      className="justify-center items-center  backgroundColor: colors.primary"
     >
       <View className="absolute top-36 z-11">
-        <Text className="text-white text-6xl opacity-50">" "</Text>
+        <Text style={{ color: colors.text }} className="text-6xl opacity-50">
+          " "
+        </Text>
       </View>
 
       {/* Horizontal scroll through pages */}
@@ -93,7 +97,10 @@ export default function MantraCarousel({
                     className="w-full max-w-[500px] justify-center items-center"
                     style={{ height: SCREEN_HEIGHT * 0.5 }}
                   >
-                    <Text className="text-white text-center leading-10 text-3xl font-light tracking-wide">
+                    <Text
+                      style={{ color: colors.text }}
+                      className="text-center leading-10 text-3xl font-light tracking-wide"
+                    >
                       {page.content}
                     </Text>
                   </View>
@@ -103,24 +110,28 @@ export default function MantraCarousel({
                   style={{
                     width: '100%',
                     maxWidth: 500,
-                    height: SCREEN_HEIGHT * 0.55,
+                    height: SCREEN_HEIGHT * 0.6,
                   }}
                   contentContainerStyle={{
                     paddingVertical: 40,
                     paddingHorizontal: 24,
                     paddingBottom: 60,
-                    paddingTop: 0,
                   }}
                   showsVerticalScrollIndicator={false}
                   nestedScrollEnabled={true}
                 >
                   <View className="mb-6">
-                    <Text className="text-[#E6D29C] text-3xl font-semibold text-center">
+                    <Text
+                      style={{ color: colors.secondary }}
+                      className=" text-3xl font-semibold text-center"
+                    >
                       {page.title}
                     </Text>
                   </View>
 
-                  <Text className="text-white leading-7 text-lg">{page.content}</Text>
+                  <Text style={{ color: colors.text }} className=" leading-7 text-lg">
+                    {page.content}
+                  </Text>
                 </ScrollView>
               )}
             </View>
@@ -134,8 +145,9 @@ export default function MantraCarousel({
           <View
             key={`${item.mantra_id}-${page.title}`}
             className={`h-2 rounded-full mx-1 ${
-              pages.indexOf(page) === currentIndex ? 'w-2 bg-white' : 'w-2 bg-white/40'
+              pages.indexOf(page) === currentIndex ? 'w-2' : 'w-2 opacity-40'
             }`}
+            style={{ backgroundColor: colors.text }}
           />
         ))}
       </View>
