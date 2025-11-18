@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-  ActivityIndicator,
-  Text,
-  Alert,
-  Pressable,
-} from 'react-native';
+import { View, FlatList, Dimensions, ActivityIndicator, Text, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
 import { mantraService, Mantra } from '../services/mantra.service';
@@ -111,10 +102,8 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  //TODO: Implement search functionality
   const handleSearch = (query: string) => {
     console.log('Searching for:', query);
-    // TODO: Implement your search logic
   };
 
   const handleUserPress = () => {
@@ -129,57 +118,12 @@ export default function HomeScreen({ navigation }: any) {
     );
   };
 
-  // Determine what to render based on loading state and feed data (SonarQube)
-  let content;
-
   if (loading) {
-    content = (
+    return (
       <View className="flex-1 bg-[#9AA793] justify-center items-center">
         <ActivityIndicator size="large" color="#E6D29C" />
         <Text className="text-white mt-4 text-base">Loading mantras...</Text>
       </View>
-    );
-  } else if (feedData.length === 0) {
-    content = (
-      <View className="flex-1 bg-[#9AA793] justify-center items-center px-6">
-        <Ionicons name="book-outline" size={64} color="#E6D29C" />
-        <Text className="text-white mt-4 text-lg font-semibold text-center">
-          No mantras available
-        </Text>
-        <TouchableOpacity
-          className="bg-[#E6D29C] rounded-full px-6 py-3 mt-6"
-          onPress={loadMantras}
-          accessibilityRole="button"
-        >
-          <Text className="text-[#6D7E68] font-semibold text-base">Refresh</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  } else {
-    content = (
-      <FlatList
-        data={feedData}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() =>
-              navigation.navigate('Focus', {
-                mantra: item,
-                onLike: handleLike,
-                onSave: handleSave,
-              })
-            }
-          >
-            <MantraCarousel item={item} onLike={handleLike} onSave={handleSave} />
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.mantra_id.toString()}
-        pagingEnabled
-        showsVerticalScrollIndicator={false}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        snapToInterval={SCREEN_HEIGHT}
-      />
     );
   }
 
@@ -191,8 +135,29 @@ export default function HomeScreen({ navigation }: any) {
         <IconButton type="profile" onPress={handleUserPress} testID="profile-btn" />
       </View>
 
-      {/* Main content */}
-      {content}
+      <FlatList
+        data={feedData}
+        renderItem={({ item }) => (
+          <MantraCarousel
+            item={item}
+            onLike={handleLike}
+            onSave={handleSave}
+            onPress={() =>
+              navigation.navigate('Focus', {
+                mantra: item,
+                onLike: handleLike,
+                onSave: handleSave,
+              })
+            }
+          />
+        )}
+        keyExtractor={(item) => item.mantra_id.toString()}
+        pagingEnabled
+        snapToAlignment="start"
+        showsVerticalScrollIndicator={false}
+        decelerationRate="fast"
+        snapToInterval={SCREEN_HEIGHT}
+      />
     </View>
   );
 }
