@@ -1,5 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, Dimensions, FlatList, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Dimensions,
+  FlatList,
+  ScrollView,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { Mantra } from '../services/mantra.service';
 import IconButton from '../components/UI/iconButton';
 
@@ -10,6 +17,7 @@ interface MantraCarouselProps {
   readonly onLike?: (mantraId: number) => void;
   readonly onSave?: (mantraId: number) => void;
   readonly showButtons?: boolean;
+  readonly onPress?: () => void;
 }
 
 export default function MantraCarousel({
@@ -17,10 +25,10 @@ export default function MantraCarousel({
   onLike,
   onSave,
   showButtons = true,
+  onPress,
 }: Readonly<MantraCarouselProps>) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Filter out pages with no content
   const pages = [
     { title: 'Mantra', content: item.title },
     { title: 'Key Takeaway', content: item.key_takeaway },
@@ -80,17 +88,17 @@ export default function MantraCarousel({
           renderItem={({ item: page, index }) => (
             <View style={{ width: SCREEN_WIDTH }} className="justify-center items-center px-6">
               {index === 0 ? (
-                // First page (Mantra) - centered, no scroll
-                <View
-                  className="w-full max-w-[500px] justify-center items-center"
-                  style={{ height: SCREEN_HEIGHT * 0.5 }}
-                >
-                  <Text className="text-white text-center leading-10 text-3xl font-light tracking-wide">
-                    {page.content}
-                  </Text>
-                </View>
+                <TouchableWithoutFeedback onPress={onPress}>
+                  <View
+                    className="w-full max-w-[500px] justify-center items-center"
+                    style={{ height: SCREEN_HEIGHT * 0.5 }}
+                  >
+                    <Text className="text-white text-center leading-10 text-3xl font-light tracking-wide">
+                      {page.content}
+                    </Text>
+                  </View>
+                </TouchableWithoutFeedback>
               ) : (
-                // Other pages - scrollable
                 <ScrollView
                   style={{
                     width: '100%',
@@ -112,7 +120,7 @@ export default function MantraCarousel({
                     </Text>
                   </View>
 
-                  <Text className="text-white  leading-7 text-lg">{page.content}</Text>
+                  <Text className="text-white leading-7 text-lg">{page.content}</Text>
                 </ScrollView>
               )}
             </View>
@@ -124,7 +132,7 @@ export default function MantraCarousel({
       <View className="absolute bottom-40 left-0 right-0 flex-row justify-center items-center">
         {pages.map((page) => (
           <View
-            key={`${item.mantra_id}-${page.title}`} // Use a stable, unique key (SonarQube)
+            key={`${item.mantra_id}-${page.title}`}
             className={`h-2 rounded-full mx-1 ${
               pages.indexOf(page) === currentIndex ? 'w-2 bg-white' : 'w-2 bg-white/40'
             }`}

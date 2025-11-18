@@ -1,10 +1,8 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
 import { Mantra } from '../services/mantra.service';
-
-const { width } = Dimensions.get('window');
 
 export default function FocusScreen({ route, navigation }: any) {
   const { mantra, onLike, onSave } = route.params as {
@@ -15,7 +13,6 @@ export default function FocusScreen({ route, navigation }: any) {
 
   return (
     <View className="flex-1 bg-[#9AA793]">
-      {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={{
@@ -29,8 +26,13 @@ export default function FocusScreen({ route, navigation }: any) {
         <Ionicons name="chevron-back" size={32} color="white" />
       </TouchableOpacity>
 
-      {/* Full-screen carousel */}
-      <MantraCarousel item={mantra} onLike={onLike} onSave={onSave} showButtons={false} />
+      <MantraCarousel
+        item={mantra}
+        onLike={onLike}
+        onSave={onSave}
+        showButtons={false}
+        onPress={() => {}}
+      />
     </View>
   );
 }
