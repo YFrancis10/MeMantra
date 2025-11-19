@@ -30,6 +30,7 @@ export default function FocusScreen({ route, navigation }: any) {
         onSave={onSave}
         showButtons={false}
         onPress={() => {}}
+        isFocusMode={true}
       />
     </View>
   );

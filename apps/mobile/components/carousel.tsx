@@ -19,6 +19,7 @@ interface MantraCarouselProps {
   readonly onSave?: (mantraId: number) => void;
   readonly showButtons?: boolean;
   readonly onPress?: () => void;
+  readonly isFocusMode?: boolean;
 }
 
 export default function MantraCarousel({
@@ -27,6 +28,7 @@ export default function MantraCarousel({
   onSave,
   showButtons = true,
   onPress,
+  isFocusMode = false,
 }: Readonly<MantraCarouselProps>) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { colors } = useTheme();
@@ -92,6 +94,7 @@ export default function MantraCarousel({
           renderItem={({ item: page, index }) => (
             <View style={{ width: SCREEN_WIDTH }} className="justify-center items-center px-6">
               {index === 0 ? (
+                /* MANTRA PAGE */
                 <TouchableWithoutFeedback onPress={onPress}>
                   <View
                     className="w-full max-w-[500px] justify-center items-center"
@@ -99,13 +102,14 @@ export default function MantraCarousel({
                   >
                     <Text
                       style={{ color: colors.text }}
-                      className="text-center leading-10 text-3xl font-light tracking-wide"
+                      className={`text-center leading-10 font-light tracking-wide ${isFocusMode ? 'text-4xl' : 'text-3xl'}`}
                     >
                       {page.content}
                     </Text>
                   </View>
                 </TouchableWithoutFeedback>
               ) : (
+                /* OTHER PAGES */
                 <ScrollView
                   style={{
                     width: '100%',
@@ -129,7 +133,10 @@ export default function MantraCarousel({
                     </Text>
                   </View>
 
-                  <Text style={{ color: colors.text }} className=" leading-7 text-lg">
+                  <Text
+                    style={{ color: colors.text }}
+                    className={`leading-7 ${isFocusMode ? 'text-xl' : 'text-lg'}`}
+                  >
                     {page.content}
                   </Text>
                 </ScrollView>

@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Dimensions, ActivityIndicator, Text, Alert } from 'react-native';
+import {
+  View,
+  FlatList,
+  Dimensions,
+  ActivityIndicator,
+  Text,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
 import { mantraService, Mantra } from '../services/mantra.service';
@@ -117,30 +125,44 @@ export default function HomeScreen({ navigation }: any) {
       { cancelable: true },
     );
   };
+  let content;
 
   if (loading) {
-    return (
+    content = (
       <View
         className="flex-1 justify-center items-center"
         style={{ backgroundColor: colors.primary }}
       >
         <ActivityIndicator size="large" color={colors.secondary} />
-        <Text style={{ color: colors.text }} className="mt-4 text-base">
-          {' '}
-          Loading mantras...{' '}
+        <Text className="mt-4 text-base" style={{ color: colors.text }}>
+          Loading mantras...
         </Text>
       </View>
     );
-  }
-
-  return (
-    <View className="flex-1" style={{ backgroundColor: colors.primary }}>
-      {/* Header */}
-      <View className="absolute top-5 left-0 right-0 z-10 flex-row justify-between items-center px-6 pt-14 pb-4">
-        <SearchBar onSearch={handleSearch} placeholder="Search mantras..." />
-        <IconButton type="profile" onPress={handleUserPress} testID="profile-btn" />
+  } else if (feedData.length === 0) {
+    content = (
+      <View
+        className="flex-1 justify-center items-center px-6"
+        style={{ backgroundColor: colors.primary }}
+      >
+        <Ionicons name="book-outline" size={64} color={colors.secondary} />
+        <Text className="mt-4 text-lg font-semibold text-center" style={{ color: colors.text }}>
+          No mantras available
+        </Text>
+        <TouchableOpacity
+          className="rounded-full px-6 py-3 mt-6"
+          onPress={loadMantras}
+          accessibilityRole="button"
+          style={{ backgroundColor: colors.secondary }}
+        >
+          <Text className="font-semibold text-base" style={{ color: colors.primary }}>
+            Refresh
+          </Text>
+        </TouchableOpacity>
       </View>
-
+    );
+  } else {
+    content = (
       <FlatList
         data={feedData}
         renderItem={({ item }) => (
@@ -164,6 +186,17 @@ export default function HomeScreen({ navigation }: any) {
         decelerationRate="fast"
         snapToInterval={SCREEN_HEIGHT}
       />
+    );
+  }
+  return (
+    <View className="flex-1" style={{ backgroundColor: colors.primary }}>
+      <View className="absolute top-5 left-0 right-0 z-10 flex-row justify-between items-center px-6 pt-14 pb-4">
+        <SearchBar onSearch={handleSearch} placeholder="Search mantras..." />
+        <IconButton type="profile" onPress={handleUserPress} testID="profile-btn" />
+      </View>
+
+      {/* Dynamic content */}
+      {content}
     </View>
   );
 }
