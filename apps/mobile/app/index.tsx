@@ -8,6 +8,7 @@ import { storage } from '../utils/storage';
 import Login from '../screens/login';
 import Signup from '../screens/SignUp';
 import BottomTabNavigator from '../components/bottomTabNavigator';
+import FocusScreen from '../screens/focusScreen';
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,21 @@ export default function MainNavigator() {
         <Stack.Screen name="MainApp" component={BottomTabNavigator} />
         <Stack.Screen name="Login" component={Login} options={{ headerTitle: 'Login' }} />
         <Stack.Screen name="Signup" component={Signup} options={{ headerTitle: 'Signup' }} />
+        <Stack.Screen
+          name="Focus"
+          component={FocusScreen}
+          options={{
+            cardStyleInterpolator: ({ current }) => ({
+              cardStyle: {
+                opacity: current.progress,
+              },
+            }),
+            transitionSpec: {
+              open: { animation: 'timing', config: { duration: 450 } },
+              close: { animation: 'timing', config: { duration: 350 } },
+            },
+          }}
+        />
       </Stack.Navigator>
     </ThemeProvider>
   );
