@@ -1,0 +1,118 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { storage } from '../utils/storage';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../src/naviagation/types';
+import { logoutUser } from '../utils/auth';
+
+type ProfileNavProp = StackNavigationProp<RootStackParamList>;
+
+export default function ProfileScreen() {
+  const navigation = useNavigation<ProfileNavProp>();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const userData = await storage.getUserData();
+      const fullName =
+        userData?.first_name && userData?.last_name
+          ? `${userData.first_name} ${userData.last_name}`
+          : userData?.username || 'User';
+
+      setUserName(fullName);
+    };
+
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await logoutUser(navigation);
+  };
+
+  const handleUpdateEmail = () => {
+    navigation.navigate('UpdateEmail');
+  };
+
+  const handleUpdatePassword = () => {
+    navigation.navigate('UpdatePassword');
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert('Delete Account', 'Are you sure you want to permanently delete your account?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => console.log('Delete logic goes here'),
+      },
+    ]);
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.name}>{userName}</Text>
+
+      <View style={styles.optionsContainer}>
+        <ProfileOption label="Update Email" onPress={handleUpdateEmail} />
+
+        <ProfileOption label="Update Password" onPress={handleUpdatePassword} />
+
+        <ProfileOption label="Delete Account" onPress={handleDeleteAccount} destructive />
+
+        <ProfileOption label="Sign Out" onPress={handleLogout} />
+      </View>
+    </View>
+  );
+}
+
+function ProfileOption({
+  label,
+  onPress,
+  destructive = false,
+}: {
+  label: string;
+  onPress: () => void;
+  destructive?: boolean;
+}) {
+  return (
+    <TouchableOpacity style={styles.option} onPress={onPress}>
+      <Text style={[styles.optionText, destructive && styles.destructiveText]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#A8B3A2',
+    paddingTop: 70,
+    paddingHorizontal: 20,
+  },
+  name: {
+    fontSize: 34,
+    fontWeight: '700',
+    fontFamily: 'Red_Hat_Text-Bold',
+    color: 'white',
+    marginBottom: 40,
+    textAlign: 'center',
+  },
+  optionsContainer: {
+    marginTop: 20,
+    gap: 20,
+  },
+  option: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  optionText: {
+    fontSize: 18,
+    fontFamily: 'Red_Hat_Text-SemiBold',
+    color: '#333',
+  },
+  destructiveText: {
+    color: '#b30000',
+  },
+});
