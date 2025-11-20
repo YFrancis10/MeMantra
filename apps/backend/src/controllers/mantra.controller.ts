@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { MantraModel } from '../models/mantra.model';
+import { CollectionModel } from '../models/collection.model';
 import { CreateMantraInput, UpdateMantraInput, MantraQueryInput } from '../validators/mantra.validator';
 import { db } from '../db';
 
@@ -249,4 +250,132 @@ async getFeedMantras(req: Request, res: Response) {
     });
   }
 },
+
+  // POST /api/mantras/:mantraId/save - Save mantra to user's "Saved Mantras" collection
+  async saveMantra(req: Request, res: Response) {
+    try {
+      // 1. Check authentication
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
+      // 2. Get mantra ID from URL
+      const mantraId = Number(req.params.mantraId);
+
+      // 3. Verify mantra exists
+      const mantra = await MantraModel.findById(mantraId);
+      if (!mantra) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Mantra not found',
+        });
+      }
+
+      // 4. Find or create "Saved Mantras" collection (lazy creation)
+      const allCollections = await CollectionModel.findByUserId(userId);
+      let savedCollection = allCollections.find(c => c.name === 'Saved Mantras');
+
+      if (!savedCollection) {
+        // Create default collection for this user
+        savedCollection = await CollectionModel.create(
+          userId,
+          'Saved Mantras',
+          'Your saved mantras'
+        );
+      }
+
+      // 5. Check if mantra is already saved (prevent duplicates)
+      const isAlreadySaved = await CollectionModel.isMantraInCollection(
+        savedCollection.collection_id,
+        mantraId
+      );
+
+      if (isAlreadySaved) {
+        return res.status(200).json({
+          status: 'success',
+          message: 'Mantra already saved',
+        });
+      }
+
+      // 6. Add mantra to collection
+      await CollectionModel.addMantra(
+        savedCollection.collection_id,
+        mantraId,
+        userId
+      );
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Mantra saved successfully',
+      });
+    } catch (error) {
+      console.error('Save mantra error:', error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error saving mantra',
+      });
+    }
+  },
+
+  // DELETE /api/mantras/:mantraId/save - Remove mantra from user's "Saved Mantras" collection
+  async unsaveMantra(req: Request, res: Response) {
+    try {
+      // 1. Check authentication
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
+      // 2. Get mantra ID from URL
+      const mantraId = Number(req.params.mantraId);
+
+      // 3. Find "Saved Mantras" collection
+      const allCollections = await CollectionModel.findByUserId(userId);
+      const savedCollection = allCollections.find(c => c.name === 'Saved Mantras');
+
+      if (!savedCollection) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'No saved mantras collection found',
+        });
+      }
+
+      // 4. Check if mantra is actually saved
+      const isSaved = await CollectionModel.isMantraInCollection(
+        savedCollection.collection_id,
+        mantraId
+      );
+
+      if (!isSaved) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Mantra not found in saved collection',
+        });
+      }
+
+      // 5. Remove mantra from collection
+      await CollectionModel.removeMantra(
+        savedCollection.collection_id,
+        mantraId
+      );
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Mantra unsaved successfully',
+      });
+    } catch (error) {
+      console.error('Unsave mantra error:', error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error unsaving mantra',
+      });
+    }
+  },
 };
