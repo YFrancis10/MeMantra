@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { storage } from '../utils/storage';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../src/naviagation/types';
@@ -10,7 +8,6 @@ type ProfileNavProp = StackNavigationProp<RootStackParamList>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<ProfileNavProp>();
-  const [userName, setUserName] = useState('');
 
   const handleLogout = async () => {
     await logoutUser(navigation);
