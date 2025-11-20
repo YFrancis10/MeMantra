@@ -7,6 +7,8 @@ import { authService } from '../services/auth.service';
 import { storage } from '../utils/storage';
 import { useGoogleAuth } from '../services/google-auth.service';
 import { useTheme } from '../context/ThemeContext';
+import AppTextInput from '../components/UI/textInputWrapper';
+import AppText from '../components/UI/textWrapper';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -106,7 +108,7 @@ export default function LoginScreen({ navigation }: any) {
           </View>
 
           <View className="w-full max-w-[400px]">
-            <TextInput
+            <AppTextInput
               className="bg-[#ffffff] rounded-[12px] p-[16px] text-[16px] mb-[16px] border border-[#e0e0e0]"
               placeholder="Email"
               placeholderTextColor={colors.placeholderText}
@@ -117,7 +119,7 @@ export default function LoginScreen({ navigation }: any) {
               editable={!loading}
             />
 
-            <TextInput
+            <AppTextInput
               className="bg-[#ffffff] rounded-[12px] p-[16px] text-[16px] mb-[16px] border border-[#e0e0e0]"
               placeholder="Password"
               placeholderTextColor={colors.placeholderText}
@@ -134,14 +136,14 @@ export default function LoginScreen({ navigation }: any) {
               onPress={handleLogin}
               disabled={loading}
             >
-              <Text className="text-[#ffffff] text-[18px] font-semibold">Login</Text>
+              <AppText className="text-[#ffffff] text-[18px] font-semibold">Login</AppText>
             </TouchableOpacity>
 
             <TouchableOpacity className="items-center mt-[20px]" onPress={handleSignUp}>
-              <Text className="text-[#fff] text-[14px]">
+              <AppText className="text-[#fff] text-[14px]">
                 New to us?
-                <Text className="text-[#ffffff] text-[14px] font-bold"> Sign Up</Text>
-              </Text>
+                <AppText className="text-[#ffffff] text-[14px] font-bold"> Sign Up</AppText>
+              </AppText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -152,7 +154,7 @@ export default function LoginScreen({ navigation }: any) {
             >
               <View className="flex-row items-center">
                 <Image source={googleLogo} className="mr-[10px] w-[30px] h-[30px]" />
-                <Text className="text-[#fff] text-[14px]">Sign In with Google</Text>
+                <AppText className="text-[#fff] text-[14px]">Sign In with Google</AppText>
               </View>
             </TouchableOpacity>
           </View>

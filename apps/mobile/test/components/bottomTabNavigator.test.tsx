@@ -38,7 +38,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         const icon = options?.tabBarIcon ? options.tabBarIcon({ color: 'white' }) : null;
         return (
           <>
-            <Text>{name}</Text>
+            <AppText>{name}</AppText>
             {icon}
             <Component />
           </>
@@ -53,6 +53,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 });
 
 import { storage } from '../../utils/storage';
+import AppText from '../../components/UI/textWrapper';
 
 describe('BottomTabNavigator', () => {
   beforeEach(() => {

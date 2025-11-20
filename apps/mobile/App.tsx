@@ -6,6 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import MainNavigator from './app/index';
 import splashLogo from './assets/logo.png';
 import './global.css';
+import LibreBaskerville from './assets/fonts/LibreBaskerville-Regular.ttf';
+import * as Font from 'expo-font';
 
 declare const __DEV__: boolean;
 
@@ -22,6 +24,10 @@ export default function App() {
     async function prepare() {
       try {
         console.log('In development mode:', __DEV__);
+
+        await Font.loadAsync({
+          'LibreBaskerville-Regular': LibreBaskerville,
+        });
         if (__DEV__) {
           console.log('Development mode: Sentry disabled');
         } else {

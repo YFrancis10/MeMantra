@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import AppText from '../UI/textWrapper';
+import AppTextInput from '../UI/textInputWrapper';
 
 interface UserFormProps {
   formData: {
@@ -25,11 +27,11 @@ export default function UserForm({
 
   return (
     <View className="bg-white/10 rounded-3xl p-5">
-      <Text className="text-white text-lg font-semibold mb-3">
+      <AppText className="text-white text-lg font-semibold mb-3">
         {isEdit ? 'Edit User' : 'Add a new user'}
-      </Text>
+      </AppText>
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Username *"
         placeholderTextColor="#d9d9d9"
@@ -40,7 +42,7 @@ export default function UserForm({
         style={{ backgroundColor: '#ffffff' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Email *"
         placeholderTextColor="#d9d9d9"
@@ -52,7 +54,7 @@ export default function UserForm({
         style={{ backgroundColor: '#ffffff' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-4 text-base"
         placeholder={isEdit ? 'Password (leave empty to keep current)' : 'Password *'}
         placeholderTextColor="#d9d9d9"
@@ -74,9 +76,12 @@ export default function UserForm({
         {submitting ? (
           <ActivityIndicator color={colors.primaryDark} />
         ) : (
-          <Text className="text-center text-lg font-semibold" style={{ color: colors.primaryDark }}>
+          <AppText
+            className="text-center text-lg font-semibold"
+            style={{ color: colors.primaryDark }}
+          >
             {isEdit ? 'Update User' : 'Add User'}
-          </Text>
+          </AppText>
         )}
       </TouchableOpacity>
     </View>

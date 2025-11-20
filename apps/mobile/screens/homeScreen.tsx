@@ -14,6 +14,7 @@ import { mantraService, Mantra } from '../services/mantra.service';
 import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
+import AppText from '../components/UI/textWrapper';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -135,22 +136,22 @@ export default function HomeScreen({ navigation }: any) {
     content = (
       <View className="flex-1 bg-[#9AA793] justify-center items-center">
         <ActivityIndicator size="large" color="#E6D29C" />
-        <Text className="text-white mt-4 text-base">Loading mantras...</Text>
+        <AppText className="text-white mt-4 text-base">Loading mantras...</AppText>
       </View>
     );
   } else if (feedData.length === 0) {
     content = (
       <View className="flex-1 bg-[#9AA793] justify-center items-center px-6">
         <Ionicons name="book-outline" size={64} color="#E6D29C" />
-        <Text className="text-white mt-4 text-lg font-semibold text-center">
+        <AppText className="text-white mt-4 text-lg font-semibold text-center">
           No mantras available
-        </Text>
+        </AppText>
         <TouchableOpacity
           className="bg-[#E6D29C] rounded-full px-6 py-3 mt-6"
           onPress={loadMantras}
           accessibilityRole="button"
         >
-          <Text className="text-[#6D7E68] font-semibold text-base">Refresh</Text>
+          <AppText className="text-[#6D7E68] font-semibold text-base">Refresh</AppText>
         </TouchableOpacity>
       </View>
     );
