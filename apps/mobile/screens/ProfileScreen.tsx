@@ -12,20 +12,6 @@ export default function ProfileScreen() {
   const navigation = useNavigation<ProfileNavProp>();
   const [userName, setUserName] = useState('');
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const userData = await storage.getUserData();
-      const fullName =
-        userData?.first_name && userData?.last_name
-          ? `${userData.first_name} ${userData.last_name}`
-          : userData?.username || 'User';
-
-      setUserName(fullName);
-    };
-
-    loadUser();
-  }, []);
-
   const handleLogout = async () => {
     await logoutUser(navigation);
   };
@@ -51,8 +37,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.name}>{userName}</Text>
-
       <View style={styles.optionsContainer}>
         <ProfileOption label="Update Email" onPress={handleUpdateEmail} />
 
