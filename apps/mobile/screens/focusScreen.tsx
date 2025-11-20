@@ -20,6 +20,8 @@ export default function FocusScreen({ route, navigation }: any) {
         onPress={() => navigation.goBack()}
         className="absolute z-20 p-2"
         style={{ top: 60, left: 20 }}
+        testID="back-button"
+        accessibilityRole="button"
       >
         <Ionicons name="chevron-back" size={32} color={colors.text} />
       </TouchableOpacity>
@@ -29,7 +31,6 @@ export default function FocusScreen({ route, navigation }: any) {
         onLike={onLike}
         onSave={onSave}
         showButtons={false}
-        onPress={() => {}}
         isFocusMode={true}
       />
     </View>

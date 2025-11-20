@@ -1000,6 +1000,7 @@ packages:
   '@esbuild/win32-x64@0.25.10':
     resolution: {integrity: sha512-9KpxSVFCu0iK1owoez6aC/s/EdUQLDN3adTxGCqxMVhrPDj6bt5dbrHDXUuq+Bs2vATFBBrQS5vdQ/Ed2P+nbw==}
     engines: {node: '>=18'}
+    cpu: [x64]
     os: [win32]
 
   '@eslint-community/eslint-utils@4.9.0':
