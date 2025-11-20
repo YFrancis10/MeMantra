@@ -53,4 +53,18 @@ export const authService = {
     const response = await apiClient.post<AuthResponse>('/auth/google', { idToken });
     return response.data;
   },
+
+  async updateEmail(newEmail: string, token: string) {
+    const response = await apiClient.patch(
+      '/auth/email',
+      { email: newEmail },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return response.data;
+  },
 };
