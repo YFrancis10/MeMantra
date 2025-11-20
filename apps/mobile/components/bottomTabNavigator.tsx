@@ -19,8 +19,8 @@ const HomeIcon = ({ color }: { color: string }) => (
   <Ionicons name="home-outline" size={28} color={color} />
 );
 
-const LikedIcon = ({ color }: { color: string }) => (
-  <Ionicons name="heart-outline" size={28} color={color} />
+const ProfileIcon = ({ color }: { color: string }) => (
+  <Ionicons name="person-circle-outline" size={28} color={color} />
 );
 
 const AdminIcon = ({ color }: { color: string }) => (
@@ -36,8 +36,8 @@ const homeOptions = {
   tabBarIcon: ({ color }: { color: string }) => <HomeIcon color={color} />,
 };
 
-const likedOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <LikedIcon color={color} />,
+const profileOptions = {
+  tabBarIcon: ({ color }: { color: string }) => <ProfileIcon color={color} />,
 };
 
 const adminOptions = {
@@ -100,7 +100,16 @@ export default function BottomTabNavigator() {
           ),
         }}
       />
-      <Tab.Screen name="Liked" component={LikedScreen} options={likedOptions} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          ...profileOptions,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={30} color={'white'} />
+          ),
+        }}
+      />
       {isAdmin && (
         <Tab.Screen
           name="Admin"
@@ -130,10 +139,10 @@ function LibraryScreen() {
   );
 }
 
-function LikedScreen() {
+function ProfileScreen() {
   return (
     <View style={styles.screenContainer}>
-      <AppText>Liked Screen</AppText>
+      <AppText>Profile Screen</AppText>
     </View>
   );
 }

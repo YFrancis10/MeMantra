@@ -73,9 +73,9 @@ describe('BottomTabNavigator', () => {
     expect(getByText('home-outline-white')).toBeTruthy();
     expect(getByText('Mock Home Screen')).toBeTruthy();
 
-    expect(getByText('Liked')).toBeTruthy();
-    expect(getByText('heart-outline-white')).toBeTruthy();
-    expect(getByText('Liked Screen')).toBeTruthy();
+    expect(getByText('profile')).toBeTruthy();
+    expect(getByText('person-circle-outline-white')).toBeTruthy();
+    expect(getByText('Profile Screen')).toBeTruthy();
 
     expect(queryByText('Admin')).toBeNull();
   });
