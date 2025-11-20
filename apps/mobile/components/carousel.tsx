@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { View, Text, Dimensions, FlatList, ScrollView } from 'react-native';
 import { Mantra } from '../services/mantra.service';
 import IconButton from '../components/UI/iconButton';
+import AppText from './UI/textWrapper';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -51,7 +52,7 @@ export default function MantraCarousel({ item, onLike, onSave }: Readonly<Mantra
       className="justify-center items-center bg-[#9AA793]"
     >
       <View className="absolute top-36 z-11">
-        <Text className="text-white text-6xl opacity-50">" "</Text>
+        <AppText className="text-white text-6xl opacity-50">" "</AppText>
       </View>
 
       {/* Horizontal scroll through pages */}
@@ -79,9 +80,9 @@ export default function MantraCarousel({ item, onLike, onSave }: Readonly<Mantra
                   className="w-full max-w-[500px] justify-center items-center"
                   style={{ height: SCREEN_HEIGHT * 0.5 }}
                 >
-                  <Text className="text-white text-center leading-10 text-3xl font-light tracking-wide">
+                  <AppText className="text-white text-center leading-10 text-3xl font-light tracking-wide">
                     {page.content}
-                  </Text>
+                  </AppText>
                 </View>
               ) : (
                 // Other pages - scrollable
@@ -101,12 +102,12 @@ export default function MantraCarousel({ item, onLike, onSave }: Readonly<Mantra
                   nestedScrollEnabled={true}
                 >
                   <View className="mb-6">
-                    <Text className="text-[#E6D29C] text-3xl font-semibold text-center">
+                    <AppText className="text-[#E6D29C] text-3xl font-semibold text-center">
                       {page.title}
-                    </Text>
+                    </AppText>
                   </View>
 
-                  <Text className="text-white  leading-7 text-lg">{page.content}</Text>
+                  <AppText className="text-white  leading-7 text-lg">{page.content}</AppText>
                 </ScrollView>
               )}
             </View>

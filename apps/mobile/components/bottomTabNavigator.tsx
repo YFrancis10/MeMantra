@@ -6,6 +6,7 @@ import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
 import { storage } from '../utils/storage';
 import { isAdminEmail } from '../utils/admin';
+import AppText from './UI/textWrapper';
 
 const Tab = createBottomTabNavigator();
 
@@ -74,17 +75,57 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
+        tabBarShowLabel: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: 'white',
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.7)',
         headerShown: false,
-        tabBarLabelStyle: styles.tabLabel,
       }}
     >
-      <Tab.Screen name="Library" component={LibraryScreen} options={libraryOptions} />
-      <Tab.Screen name="Home" component={HomeScreen} options={homeOptions} />
-      <Tab.Screen name="profile" component={ProfileScreen} options={profileOptions} />
-      {isAdmin && <Tab.Screen name="Admin" component={AdminScreen} options={adminOptions} />}
+      <Tab.Screen
+        name="Library"
+        component={LibraryScreen}
+        options={{
+          ...libraryOptions,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} size={30} color={'white'} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          ...homeOptions,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={30} color={'white'} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          ...profileOptions,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={30} color={'white'} />
+          ),
+        }}
+      />
+      {isAdmin && (
+        <Tab.Screen
+          name="Admin"
+          component={AdminScreen}
+          options={{
+            ...adminOptions,
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? 'settings' : 'settings-outline'}
+                size={30}
+                color={'white'}
+              />
+            ),
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 }
@@ -93,7 +134,7 @@ export default function BottomTabNavigator() {
 function LibraryScreen() {
   return (
     <View style={styles.screenContainer}>
-      <Text>Library Screen</Text>
+      <AppText>Library Screen</AppText>
     </View>
   );
 }
@@ -101,7 +142,7 @@ function LibraryScreen() {
 function ProfileScreen() {
   return (
     <View style={styles.screenContainer}>
-      <Text>Profile Screen</Text>
+      <AppText>Profile Screen</AppText>
     </View>
   );
 }
@@ -119,12 +160,6 @@ const styles = StyleSheet.create({
     borderTopColor: 'white',
     height: 105,
     paddingBottom: 12,
-    paddingTop: 8,
-  },
-  tabLabel: {
-    fontFamily: 'Red_Hat_Text-SemiBold',
-    fontWeight: '600',
-    fontSize: 15,
-    marginTop: 4,
+    paddingTop: 15,
   },
 });
