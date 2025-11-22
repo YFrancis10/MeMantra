@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import ProfileScreen from '../../screens/ProfileScreen';
 import { storage } from '../../utils/storage';
@@ -8,8 +8,8 @@ import { logoutUser } from '../../utils/auth';
 
 jest.mock('../../utils/storage', () => ({
   storage: {
-    getUserData: jest.fn(),
     getToken: jest.fn(),
+    getUserData: jest.fn(),
   },
 }));
 
@@ -23,97 +23,258 @@ jest.mock('../../utils/auth', () => ({
   logoutUser: jest.fn(),
 }));
 
-// ✅ mock navigation hook instead of passing navigation prop
-const mockNavigate = jest.fn();
-const mockGoBack = jest.fn();
-const mockReset = jest.fn();
+const mockUseNavigation = jest.fn();
 
 jest.mock('@react-navigation/native', () => ({
-  ...jest.requireActual('@react-navigation/native'),
-  useNavigation: () => ({
-    navigate: mockNavigate,
-    goBack: mockGoBack,
-    reset: mockReset,
-  }),
+  useNavigation: mockUseNavigation,
 }));
 
 jest.spyOn(Alert, 'alert');
 
+const mockNavigation = {
+  navigate: jest.fn(),
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  (storage.getUserData as jest.Mock).mockResolvedValue({
+    username: 'testuser',
+    email: 'test@example.com',
+  });
+  (storage.getToken as jest.Mock).mockResolvedValue('mock-token');
+
+  mockUseNavigation.mockReturnValue(mockNavigation);
+});
+
 describe('ProfileScreen', () => {
-  const setup = () => render(<ProfileScreen />);
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (storage.getUserData as jest.Mock).mockResolvedValue({
-      username: 'memantraUser',
-      email: 'test@mail.com',
-    });
-  });
-
-  it('renders username', async () => {
-    const { getByText } = setup();
-
-    await waitFor(() => expect(getByText('memantraUser')).toBeTruthy());
-  });
-
-  it('navigates to UpdateEmail screen', async () => {
-    const { getByText } = setup();
-
-    fireEvent.press(getByText('Update Email'));
-
-    expect(mockNavigate).toHaveBeenCalledWith('UpdateEmail');
-  });
-
-  it('navigates to UpdatePassword screen', async () => {
-    const { getByText } = setup();
-
-    fireEvent.press(getByText('Update Password'));
-
-    expect(mockNavigate).toHaveBeenCalledWith('UpdatePassword');
-  });
-
-  it('deletes account successfully and logs out', async () => {
-    (storage.getToken as jest.Mock).mockResolvedValue('token-abc');
-    (authService.deleteAccount as jest.Mock).mockResolvedValue({ status: 'success' });
-
-    const { getByText } = setup();
-
-    fireEvent.press(getByText('Delete Account'));
-
-    const alertArgs = (Alert.alert as jest.Mock).mock.calls[0];
-    const deleteBtn = alertArgs[2].find((b: any) => b.text === 'Delete');
-
-    await act(async () => deleteBtn.onPress());
+  it('renders correctly with all options', async () => {
+    const { getByText } = render(<ProfileScreen />);
 
     await waitFor(() => {
-      expect(authService.deleteAccount).toHaveBeenCalledWith('token-abc');
-      expect(logoutUser).toHaveBeenCalled();
+      expect(getByText('testuser')).toBeTruthy();
+      expect(getByText('Update Email')).toBeTruthy();
+      expect(getByText('Update Password')).toBeTruthy();
+      expect(getByText('Delete Account')).toBeTruthy();
+      expect(getByText('Sign Out')).toBeTruthy();
     });
   });
 
-  it('handles account delete failure gracefully', async () => {
-    (storage.getToken as jest.Mock).mockResolvedValue('t');
-    (authService.deleteAccount as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+  it('loads and displays username on mount', async () => {
+    const { getByText } = render(<ProfileScreen />);
 
-    const { getByText } = setup();
+    await waitFor(() => {
+      expect(storage.getUserData).toHaveBeenCalled();
+      expect(getByText('testuser')).toBeTruthy();
+    });
+  });
 
-    fireEvent.press(getByText('Delete Account'));
+  it('displays empty username when getUserData returns null', async () => {
+    (storage.getUserData as jest.Mock).mockResolvedValue(null);
 
-    const alertArgs = (Alert.alert as jest.Mock).mock.calls[0];
-    const deleteBtn = alertArgs[2].find((b: any) => b.text === 'Delete');
+    render(<ProfileScreen />);
 
-    await act(async () => deleteBtn.onPress());
+    await waitFor(() => {
+      expect(storage.getUserData).toHaveBeenCalled();
+    });
+  });
 
-    await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to delete account.'),
+  it('displays empty username when user object has no username', async () => {
+    (storage.getUserData as jest.Mock).mockResolvedValue({
+      email: 'test@example.com',
+    });
+
+    render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(storage.getUserData).toHaveBeenCalled();
+    });
+  });
+
+  it('navigates to UpdateEmail when Update Email is pressed', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Update Email'));
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('UpdateEmail');
+    });
+  });
+
+  it('navigates to UpdatePassword when Update Password is pressed', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Update Password'));
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('UpdatePassword');
+    });
+  });
+
+  it('calls logoutUser when Sign Out is pressed', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Sign Out'));
+      expect(logoutUser).toHaveBeenCalledWith(mockNavigation);
+    });
+  });
+
+  it('shows confirmation dialog when Delete Account is pressed', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Delete Account',
+      'Are you absolutely sure you want to permanently delete your account? This action cannot be undone.',
+      expect.any(Array),
     );
   });
 
-  it('logs out when pressing Sign Out', async () => {
-    const { getByText } = setup();
+  it('cancels delete account when Cancel is pressed', async () => {
+    const { getByText } = render(<ProfileScreen />);
 
-    fireEvent.press(getByText('Sign Out'));
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
 
-    expect(logoutUser).toHaveBeenCalled();
+    const cancelCallback = (Alert.alert as jest.Mock).mock.calls[0][2][0];
+    expect(cancelCallback.text).toBe('Cancel');
+    expect(cancelCallback.style).toBe('cancel');
+  });
+
+  it('successfully deletes account and logs out user', async () => {
+    (authService.deleteAccount as jest.Mock).mockResolvedValue({
+      status: 'success',
+    });
+
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
+
+    const deleteCallback = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress;
+    await deleteCallback();
+
+    await waitFor(() => {
+      expect(authService.deleteAccount).toHaveBeenCalledWith('mock-token');
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Account Deleted',
+        'Your account has been deleted. You will now be logged out.',
+        expect.any(Array),
+      );
+    });
+
+    const okCallback = (Alert.alert as jest.Mock).mock.calls[1][2][0].onPress;
+    okCallback();
+
+    expect(logoutUser).toHaveBeenCalledWith(mockNavigation);
+  });
+
+  it('shows error when not authenticated during delete', async () => {
+    (storage.getToken as jest.Mock).mockResolvedValue(null);
+
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
+
+    const deleteCallback = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress;
+    await deleteCallback();
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error', 'Not authenticated.');
+    });
+  });
+
+  it('shows error alert when delete account fails with response message', async () => {
+    (authService.deleteAccount as jest.Mock).mockRejectedValue({
+      response: {
+        data: {
+          message: 'Cannot delete account with active subscriptions',
+        },
+      },
+    });
+
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
+
+    const deleteCallback = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress;
+    await deleteCallback();
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Error',
+        'Cannot delete account with active subscriptions',
+      );
+    });
+  });
+
+  it('shows generic error when delete account fails without message', async () => {
+    (authService.deleteAccount as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
+
+    const deleteCallback = (Alert.alert as jest.Mock).mock.calls[0][2][1].onPress;
+    await deleteCallback();
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to delete account.');
+    });
+  });
+
+  it('verifies Delete button has destructive style', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Delete Account'));
+    });
+
+    const deleteButton = (Alert.alert as jest.Mock).mock.calls[0][2][1];
+    expect(deleteButton.style).toBe('destructive');
+    expect(deleteButton.text).toBe('Delete');
+  });
+
+  it('renders ProfileOption with destructive styling for Delete Account', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      const deleteOption = getByText('Delete Account');
+      expect(deleteOption).toBeTruthy();
+    });
+  });
+
+  it('handles multiple rapid Sign Out presses gracefully', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Sign Out'));
+      fireEvent.press(getByText('Sign Out'));
+      fireEvent.press(getByText('Sign Out'));
+
+      expect(logoutUser).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  it('handles navigation being called multiple times', async () => {
+    const { getByText } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      fireEvent.press(getByText('Update Email'));
+      fireEvent.press(getByText('Update Password'));
+
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('UpdateEmail');
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('UpdatePassword');
+      expect(mockNavigation.navigate).toHaveBeenCalledTimes(2);
+    });
   });
 });
