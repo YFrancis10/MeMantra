@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { storage } from '../utils/storage';
 import { useNavigation } from '@react-navigation/native';
 import { authService } from '../services/auth.service';
+import { logoutUser } from '../utils/auth';
 
 export default function UpdateEmailScreen() {
   const navigation = useNavigation();
@@ -26,15 +27,16 @@ export default function UpdateEmailScreen() {
 
       const response = await authService.updateEmail(email, token);
 
-      // update local storage
-      const userData = await storage.getUserData();
-      await storage.saveUserData({
-        ...userData,
-        email: response.email, // backend returns email
-      });
-
-      Alert.alert('Success', 'Your email has been updated.');
-      navigation.goBack();
+      Alert.alert(
+        'Email Updated',
+        'Your email has been changed. You will be logged out for security reasons.',
+        [
+          {
+            text: 'OK',
+            onPress: () => logoutUser(navigation),
+          },
+        ],
+      );
     } catch (err: any) {
       console.error(err);
       Alert.alert('Error', err.message || 'Failed to update email.');
@@ -43,6 +45,11 @@ export default function UpdateEmailScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Text style={styles.backText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Update Email</Text>
 
       <TextInput
@@ -63,11 +70,12 @@ export default function UpdateEmailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#A8B3A2',
-    padding: 20,
-    paddingTop: 80,
+  container: { flex: 1, backgroundColor: '#A8B3A2', padding: 20, paddingTop: 80 },
+  backButton: { marginBottom: 10 },
+  backText: {
+    fontSize: 18,
+    fontFamily: 'Red_Hat_Text-SemiBold',
+    color: 'white',
   },
   title: {
     fontSize: 28,
@@ -77,18 +85,8 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     textAlign: 'center',
   },
-  input: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    fontSize: 17,
-    marginBottom: 25,
-  },
-  button: {
-    backgroundColor: '#6D7E68',
-    padding: 16,
-    borderRadius: 12,
-  },
+  input: { backgroundColor: '#fff', padding: 16, borderRadius: 12, fontSize: 17, marginBottom: 25 },
+  button: { backgroundColor: '#6D7E68', padding: 16, borderRadius: 12 },
   buttonText: {
     color: 'white',
     fontFamily: 'Red_Hat_Text-SemiBold',

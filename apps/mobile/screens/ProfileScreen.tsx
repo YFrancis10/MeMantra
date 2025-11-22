@@ -3,11 +3,25 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../src/naviagation/types';
 import { logoutUser } from '../utils/auth';
+import { storage } from '../utils/storage';
+import { authService } from '../services/auth.service';
+import React, { useEffect, useState } from 'react';
 
 type ProfileNavProp = StackNavigationProp<RootStackParamList>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<ProfileNavProp>();
+
+  const [username, setUsername] = useState<string>('');
+
+  //Show the user's username
+  useEffect(() => {
+    const load = async () => {
+      const user = await storage.getUserData();
+      setUsername(user?.username || '');
+    };
+    load();
+  }, []);
 
   const handleLogout = async () => {
     await logoutUser(navigation);
@@ -21,26 +35,54 @@ export default function ProfileScreen() {
     navigation.navigate('UpdatePassword');
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert('Delete Account', 'Are you sure you want to permanently delete your account?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => console.log('Delete logic goes here'),
-      },
-    ]);
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you absolutely sure you want to permanently delete your account? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await storage.getToken();
+              if (!token) {
+                Alert.alert('Error', 'Not authenticated.');
+                return;
+              }
+
+              await authService.deleteAccount(token);
+
+              Alert.alert(
+                'Account Deleted',
+                'Your account has been deleted. You will now be logged out.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => logoutUser(navigation),
+                  },
+                ],
+              );
+            } catch (err: any) {
+              console.error('Delete account error:', err);
+              Alert.alert('Error', err?.response?.data?.message || 'Failed to delete account.');
+            }
+          },
+        },
+      ],
+    );
   };
 
   return (
     <View style={styles.container}>
+      {/* USERNAME HEADER */}
+      <Text style={styles.name}>{username}</Text>
+
       <View style={styles.optionsContainer}>
         <ProfileOption label="Update Email" onPress={handleUpdateEmail} />
-
         <ProfileOption label="Update Password" onPress={handleUpdatePassword} />
-
         <ProfileOption label="Delete Account" onPress={handleDeleteAccount} destructive />
-
         <ProfileOption label="Sign Out" onPress={handleLogout} />
       </View>
     </View>

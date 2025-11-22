@@ -67,4 +67,21 @@ export const authService = {
 
     return response.data;
   },
+
+  async updatePassword(newPassword: string, token: string) {
+    const response = await apiClient.patch(
+      '/auth/password',
+      { password: newPassword },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  },
+
+  async deleteAccount(token: string) {
+    return apiClient.delete('/auth/account', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  },
 };
