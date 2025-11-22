@@ -2,6 +2,16 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import BottomTabNavigator from '../../components/bottomTabNavigator';
 
+/* Mock navigation */
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    reset: jest.fn(),
+  }),
+}));
+
 jest.mock('@expo/vector-icons', () => {
   const React = jest.requireActual('react');
   const { Text } = jest.requireActual('react-native');
@@ -23,6 +33,13 @@ jest.mock('../../screens/adminScreen', () => {
   return () => React.createElement(Text, null, 'Admin Screen');
 });
 
+/* Mock ProfileScreen for username and options */
+jest.mock('../../screens/ProfileScreen', () => {
+  const React = jest.requireActual('react');
+  const { Text } = jest.requireActual('react-native');
+  return () => React.createElement(Text, null, 'Profile Screen');
+});
+
 jest.mock('../../utils/storage', () => ({
   storage: {
     getUserData: jest.fn(),
@@ -36,6 +53,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
     createBottomTabNavigator: () => {
       const Screen = ({ component: Component, options, name }: any) => {
         const icon = options?.tabBarIcon ? options.tabBarIcon({ color: 'white' }) : null;
+
         return (
           <>
             <Text>{name}</Text>
@@ -85,6 +103,7 @@ describe('BottomTabNavigator', () => {
     const { getByText } = render(<BottomTabNavigator />);
 
     await waitFor(() => expect(getByText('Admin')).toBeTruthy());
+
     expect(getByText('construct-outline-white')).toBeTruthy();
     expect(getByText('Admin Screen')).toBeTruthy();
   });
