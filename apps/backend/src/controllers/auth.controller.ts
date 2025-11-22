@@ -204,5 +204,91 @@ export const AuthController = {
       console.error('Google auth error:', error);
       return res.status(500).json({ status: 'error', message: 'Error during Google authentication' });
     }
+  },
+
+async updatePassword(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+    const { password } = req.body;
+
+    if (!password) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Password required" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    await UserModel.update(userId!, { password_hash: hashed });
+
+    return res.json({
+      status: "success",
+      message: "Password updated",
+    });
+
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ status: "error", message: "Failed to update password" });
   }
+},
+
+
+async deleteAccount(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+    await UserModel.delete(userId!);
+
+    res.json({ status: "success", message: "Account deleted" });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: "Failed to delete account" });
+  }
+}, 
+
+async updateEmail(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+    const { email } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated',
+      });
+    }
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid email',
+      });
+    }
+
+    // Check if email already exists
+    const existing = await UserModel.findByEmail(email);
+    if (existing && existing.user_id !== userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email already in use',
+      });
+    }
+
+    // Update email in database
+    await UserModel.updateEmail(userId, email);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Email updated successfully',
+      data: { email },
+    });
+
+  } catch (error) {
+    console.error('Update email error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Error updating email',
+    });
+  }
+}
+
+
 };

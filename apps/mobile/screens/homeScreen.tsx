@@ -14,6 +14,7 @@ import { mantraService, Mantra } from '../services/mantra.service';
 import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
+import { logoutUser } from '../utils/auth';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -86,29 +87,7 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      if (typeof storage.removeToken === 'function') {
-        await storage.removeToken();
-      } else if (typeof storage.saveToken === 'function') {
-        await storage.saveToken('');
-      }
-
-      if (typeof storage.removeUserData === 'function') {
-        await storage.removeUserData();
-      } else if (typeof storage.saveUserData === 'function') {
-        await storage.saveUserData(null);
-      }
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } catch (err) {
-      console.error('Logout error:', err);
-      Alert.alert('Error', 'Failed to log out. Please try again.');
-    }
-  };
+  const handleLogout = () => logoutUser(navigation);
 
   //TODO: Implement search functionality
   const handleSearch = (query: string) => {

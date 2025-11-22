@@ -95,5 +95,12 @@ async delete(id: number): Promise<boolean> {
   
   return result.numDeletedRows > 0;
 },
+async updateEmail(userId: number, email: string) {
+  return db
+    .updateTable('User')
+    .set({ email })
+    .where('user_id', '=', userId)
+    .executeTakeFirst();
+}
 };
 
