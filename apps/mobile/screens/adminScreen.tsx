@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
-} from 'react-native';
+import { View, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Mantra, mantraService } from '../services/mantra.service';
 import { User, userService } from '../services/user.service';
@@ -16,6 +8,7 @@ import MantraForm from '../components/admin/MantraForm';
 import MantraList from '../components/admin/MantraList';
 import UserForm from '../components/admin/UserForm';
 import UserList from '../components/admin/UserList';
+import AppText from '../components/UI/textWrapper';
 
 type AdminMode = 'mantras' | 'users';
 type ActionMode = 'add' | 'manage';
@@ -291,7 +284,7 @@ const AdminScreen: React.FC = () => {
       style={{ flex: 1 }}
     >
       <View className="flex-1 px-6 pt-16 pb-6" style={{ backgroundColor: colors.primary }}>
-        <Text className="text-white text-3xl font-bold mb-4">Admin Controls</Text>
+        <AppText className="text-white text-3xl font-bold mb-4">Admin Controls</AppText>
 
         {/* Mode Toggle: Mantras vs Users */}
         <View
@@ -308,12 +301,12 @@ const AdminScreen: React.FC = () => {
             }}
             style={{ backgroundColor: mode === 'mantras' ? colors.secondary : 'transparent' }}
           >
-            <Text
+            <AppText
               className="text-center font-semibold"
               style={{ color: mode === 'mantras' ? colors.primaryDark : colors.text }}
             >
               Mantras
-            </Text>
+            </AppText>
           </TouchableOpacity>
           <TouchableOpacity
             className="flex-1 rounded-full px-4 py-3"
@@ -325,12 +318,12 @@ const AdminScreen: React.FC = () => {
             }}
             style={{ backgroundColor: mode === 'users' ? colors.secondary : 'transparent' }}
           >
-            <Text
+            <AppText
               className="text-center font-semibold"
               style={{ color: mode === 'users' ? colors.primaryDark : colors.text }}
             >
               Users
-            </Text>
+            </AppText>
           </TouchableOpacity>
         </View>
 
@@ -344,24 +337,24 @@ const AdminScreen: React.FC = () => {
             onPress={() => setAction('add')}
             style={{ backgroundColor: action === 'add' ? colors.secondary : 'transparent' }}
           >
-            <Text
+            <AppText
               className="text-center font-semibold text-sm"
               style={{ color: action === 'add' ? colors.primaryDark : colors.text }}
             >
               Add
-            </Text>
+            </AppText>
           </TouchableOpacity>
           <TouchableOpacity
             className="flex-1 rounded-full px-4 py-2"
             onPress={() => setAction('manage')}
             style={{ backgroundColor: action === 'manage' ? colors.secondary : 'transparent' }}
           >
-            <Text
+            <AppText
               className="text-center font-semibold text-sm"
               style={{ color: action === 'manage' ? colors.primaryDark : colors.text }}
             >
               Manage
-            </Text>
+            </AppText>
           </TouchableOpacity>
         </View>
 
@@ -412,9 +405,9 @@ const AdminScreen: React.FC = () => {
         >
           <View className="flex-1 px-6 pt-16 pb-6" style={{ backgroundColor: colors.primary }}>
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-white text-2xl font-bold">
+              <AppText className="text-white text-2xl font-bold">
                 Edit {mode === 'mantras' ? 'Mantra' : 'User'}
-              </Text>
+              </AppText>
               <TouchableOpacity
                 onPress={() => {
                   setEditModalVisible(false);
@@ -422,7 +415,7 @@ const AdminScreen: React.FC = () => {
                   resetUserForm();
                 }}
               >
-                <Text className="text-white text-2xl">✕</Text>
+                <AppText className="text-white text-2xl">✕</AppText>
               </TouchableOpacity>
             </View>
 

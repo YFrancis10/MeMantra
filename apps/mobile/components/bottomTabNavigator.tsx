@@ -1,47 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
 import { storage } from '../utils/storage';
 import { isAdminEmail } from '../utils/admin';
+import AppText from './UI/textWrapper';
 
 const Tab = createBottomTabNavigator();
 
-// icons def
-const LibraryIcon = ({ color }: { color: string }) => (
-  <Ionicons name="bookmark-outline" size={28} color={color} />
+// Tab bar icon components defined outside to avoid recreation on each render
+const LibraryTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} size={30} color={'white'} />
 );
 
-const HomeIcon = ({ color }: { color: string }) => (
-  <Ionicons name="home-outline" size={28} color={color} />
+const HomeTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'home' : 'home-outline'} size={30} color={'white'} />
 );
 
-const ProfileIcon = ({ color }: { color: string }) => (
-  <Ionicons name="person-circle-outline" size={28} color={color} />
+const ProfileTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'person' : 'person-outline'} size={30} color={'white'} />
 );
 
-const AdminIcon = ({ color }: { color: string }) => (
-  <Ionicons name="construct-outline" size={28} color={color} />
+const AdminTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'settings' : 'settings-outline'} size={30} color={'white'} />
 );
-
-// options def
-const libraryOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <LibraryIcon color={color} />,
-};
-
-const homeOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <HomeIcon color={color} />,
-};
-
-const profileOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <ProfileIcon color={color} />,
-};
-
-const adminOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <AdminIcon color={color} />,
-};
 
 export default function BottomTabNavigator() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -74,17 +58,41 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
+        tabBarShowLabel: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: 'white',
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.7)',
         headerShown: false,
-        tabBarLabelStyle: styles.tabLabel,
       }}
     >
-      <Tab.Screen name="Library" component={LibraryScreen} options={libraryOptions} />
-      <Tab.Screen name="Home" component={HomeScreen} options={homeOptions} />
-      <Tab.Screen name="profile" component={ProfileScreen} options={profileOptions} />
-      {isAdmin && <Tab.Screen name="Admin" component={AdminScreen} options={adminOptions} />}
+      <Tab.Screen
+        name="Library"
+        component={LibraryScreen}
+        options={{
+          tabBarIcon: LibraryTabIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: HomeTabIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ProfileTabIcon,
+        }}
+      />
+      {isAdmin && (
+        <Tab.Screen
+          name="Admin"
+          component={AdminScreen}
+          options={{
+            tabBarIcon: AdminTabIcon,
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 }
@@ -93,7 +101,7 @@ export default function BottomTabNavigator() {
 function LibraryScreen() {
   return (
     <View style={styles.screenContainer}>
-      <Text>Library Screen</Text>
+      <AppText>Library Screen</AppText>
     </View>
   );
 }
@@ -101,7 +109,7 @@ function LibraryScreen() {
 function ProfileScreen() {
   return (
     <View style={styles.screenContainer}>
-      <Text>Profile Screen</Text>
+      <AppText>Profile Screen</AppText>
     </View>
   );
 }
@@ -119,12 +127,6 @@ const styles = StyleSheet.create({
     borderTopColor: 'white',
     height: 105,
     paddingBottom: 12,
-    paddingTop: 8,
-  },
-  tabLabel: {
-    fontFamily: 'Red_Hat_Text-SemiBold',
-    fontWeight: '600',
-    fontSize: 15,
-    marginTop: 4,
+    paddingTop: 15,
   },
 });

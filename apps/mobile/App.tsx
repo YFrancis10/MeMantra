@@ -6,6 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import MainNavigator from './app/index';
 import splashLogo from './assets/logo.png';
 import './global.css';
+import LibreBaskerville from './assets/fonts/LibreBaskerville-Regular.ttf';
+import * as Font from 'expo-font';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +21,10 @@ export default function App() {
 
     async function prepare() {
       try {
+        await Font.loadAsync({
+          'LibreBaskerville-Regular': LibreBaskerville,
+        });
+
         await SplashScreen.hideAsync();
         if (isMounted) {
           setAppIsReady(true);

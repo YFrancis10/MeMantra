@@ -1,14 +1,8 @@
 import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Dimensions,
-  FlatList,
-  ScrollView,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import { View, Dimensions, FlatList, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { Mantra } from '../services/mantra.service';
 import IconButton from '../components/UI/iconButton';
+import AppText from './UI/textWrapper';
 import { useTheme } from '../context/ThemeContext';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -69,9 +63,9 @@ export default function MantraCarousel({
       className="justify-center items-center  backgroundColor: colors.primary"
     >
       <View className="absolute top-36 z-11">
-        <Text style={{ color: colors.text }} className="text-6xl opacity-50">
+        <AppText style={{ color: colors.text }} className="text-6xl opacity-50">
           " "
-        </Text>
+        </AppText>
       </View>
 
       {/* Horizontal scroll through pages */}
@@ -100,12 +94,12 @@ export default function MantraCarousel({
                     className="w-full max-w-[500px] justify-center items-center"
                     style={{ height: SCREEN_HEIGHT * 0.5 }}
                   >
-                    <Text
+                    <AppText
                       style={{ color: colors.text }}
                       className={`text-center leading-10 font-light tracking-wide ${isFocusMode ? 'text-4xl' : 'text-3xl'}`}
                     >
                       {page.content}
-                    </Text>
+                    </AppText>
                   </View>
                 </TouchableWithoutFeedback>
               ) : (
@@ -125,20 +119,20 @@ export default function MantraCarousel({
                   nestedScrollEnabled={true}
                 >
                   <View className="mb-6">
-                    <Text
+                    <AppText
                       style={{ color: colors.secondary }}
                       className=" text-3xl font-semibold text-center"
                     >
                       {page.title}
-                    </Text>
+                    </AppText>
                   </View>
 
-                  <Text
+                  <AppText
                     style={{ color: colors.text }}
                     className={`leading-7 ${isFocusMode ? 'text-xl' : 'text-lg'}`}
                   >
                     {page.content}
-                  </Text>
+                  </AppText>
                 </ScrollView>
               )}
             </View>

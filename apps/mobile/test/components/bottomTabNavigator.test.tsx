@@ -72,8 +72,8 @@ describe('BottomTabNavigator', () => {
     expect(getByText('home-outline-white')).toBeTruthy();
     expect(getByText('Mock Home Screen')).toBeTruthy();
 
-    expect(getByText('profile')).toBeTruthy();
-    expect(getByText('person-circle-outline-white')).toBeTruthy();
+    expect(getByText('Profile')).toBeTruthy();
+    expect(getByText('person-outline-white')).toBeTruthy();
     expect(getByText('Profile Screen')).toBeTruthy();
 
     expect(queryByText('Admin')).toBeNull();
@@ -85,7 +85,7 @@ describe('BottomTabNavigator', () => {
     const { getByText } = render(<BottomTabNavigator />);
 
     await waitFor(() => expect(getByText('Admin')).toBeTruthy());
-    expect(getByText('construct-outline-white')).toBeTruthy();
+    expect(getByText('settings-outline-white')).toBeTruthy();
     expect(getByText('Admin Screen')).toBeTruthy();
   });
 });

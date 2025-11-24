@@ -4,7 +4,6 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
-  Text,
   Alert,
   TouchableOpacity,
 } from 'react-native';
@@ -14,6 +13,7 @@ import { mantraService, Mantra } from '../services/mantra.service';
 import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
+import AppText from '../components/UI/textWrapper';
 import { useTheme } from '../context/ThemeContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -140,9 +140,9 @@ export default function HomeScreen({ navigation }: any) {
         style={{ backgroundColor: colors.primary }}
       >
         <ActivityIndicator size="large" color={colors.secondary} />
-        <Text className="mt-4 text-base" style={{ color: colors.text }}>
+        <AppText className="mt-4 text-base" style={{ color: colors.text }}>
           Loading mantras...
-        </Text>
+        </AppText>
       </View>
     );
   } else if (feedData.length === 0) {
@@ -152,18 +152,18 @@ export default function HomeScreen({ navigation }: any) {
         style={{ backgroundColor: colors.primary }}
       >
         <Ionicons name="book-outline" size={64} color={colors.secondary} />
-        <Text className="mt-4 text-lg font-semibold text-center" style={{ color: colors.text }}>
+        <AppText className="mt-4 text-lg font-semibold text-center" style={{ color: colors.text }}>
           No mantras available
-        </Text>
+        </AppText>
         <TouchableOpacity
           className="rounded-full px-6 py-3 mt-6"
           onPress={loadMantras}
           accessibilityRole="button"
           style={{ backgroundColor: colors.secondary }}
         >
-          <Text className="font-semibold text-base" style={{ color: colors.primary }}>
+          <AppText className="font-semibold text-base" style={{ color: colors.primary }}>
             Refresh
-          </Text>
+          </AppText>
         </TouchableOpacity>
       </View>
     );
