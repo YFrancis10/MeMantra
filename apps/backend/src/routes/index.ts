@@ -7,6 +7,7 @@ import likeRoutes from './like.routes';
 import reminderRoutes from './reminder.routes';
 import recommendationRoutes from './recommendation.routes';
 import userRoutes from './user.routes';
+import notificationRoutes from './notification.routes';
 
 const router = Router();
 
@@ -33,5 +34,8 @@ router.use('/recommendations', recommendationRoutes);
 
 // User routes
 router.use('/users', userRoutes);
+
+// Notification routes
+router.use('/notifications', notificationRoutes);
 
 export default router;
