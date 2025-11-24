@@ -3,6 +3,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ThemeProvider } from '../context/ThemeContext';
 import { storage } from '../utils/storage';
+import { notificationService } from '../services/notification.service';
 
 // Import your screens
 import Login from '../screens/login';
@@ -27,6 +28,24 @@ export default function MainNavigator() {
 
     checkAuth();
   }, []);
+
+  // Set up push notifications when user is logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      const setupNotifications = async () => {
+        try {
+          const pushToken = await notificationService.setupNotifications();
+          if (pushToken) {
+            console.log('Push notifications set up successfully');
+          }
+        } catch (error) {
+          console.error('Failed to set up push notifications:', error);
+        }
+      };
+
+      setupNotifications();
+    }
+  }, [isLoggedIn]);
 
   if (isLoggedIn === null) {
     return (
