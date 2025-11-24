@@ -53,7 +53,10 @@ export default function SignUpScreen({ navigation }: any) {
           {
             text: 'OK',
             onPress: () => {
-              //navigate home
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'MainApp' }],
+              });
             },
           },
         ]);
