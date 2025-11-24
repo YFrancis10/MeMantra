@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, Dimensions, FlatList, ScrollView } from 'react-native';
+import { View, Dimensions, FlatList, ScrollView } from 'react-native';
 import { Mantra } from '../services/mantra.service';
 import IconButton from '../components/UI/iconButton';
 import AppText from './UI/textWrapper';

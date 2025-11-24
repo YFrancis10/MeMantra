@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
-  Text,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
