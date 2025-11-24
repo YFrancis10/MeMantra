@@ -3,7 +3,6 @@ import { Alert } from 'react-native';
 import HomeScreen from '../../screens/homeScreen';
 import { mantraService } from '../../services/mantra.service';
 import { storage } from '../../utils/storage';
-import AppText from '../../components/UI/textWrapper';
 
 jest.mock('../../components/carousel', () => {
   const React = jest.requireActual('react');
@@ -12,12 +11,12 @@ jest.mock('../../components/carousel', () => {
   return function MockCarousel({ item, onLike, onSave }: any) {
     return (
       <View>
-        <AppText>{item.title}</AppText>
+        <Text>{item.title}</Text>
         <TouchableOpacity testID={`like-${item.mantra_id}`} onPress={() => onLike(item.mantra_id)}>
-          <AppText>Like</AppText>
+          <Text>Like</Text>
         </TouchableOpacity>
         <TouchableOpacity testID={`save-${item.mantra_id}`} onPress={() => onSave(item.mantra_id)}>
-          <AppText>Save</AppText>
+          <Text>Save</Text>
         </TouchableOpacity>
       </View>
     );

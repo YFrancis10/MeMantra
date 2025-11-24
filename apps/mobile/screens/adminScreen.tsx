@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
-} from 'react-native';
+import { View, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Mantra, mantraService } from '../services/mantra.service';
 import { User, userService } from '../services/user.service';

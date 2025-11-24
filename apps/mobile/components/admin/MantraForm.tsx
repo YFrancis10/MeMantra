@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import AppText from '../UI/textWrapper';
 import AppTextInput from '../UI/textInputWrapper';

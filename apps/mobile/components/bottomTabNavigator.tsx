@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
@@ -10,39 +10,22 @@ import AppText from './UI/textWrapper';
 
 const Tab = createBottomTabNavigator();
 
-// icons def
-const LibraryIcon = ({ color }: { color: string }) => (
-  <Ionicons name="bookmark-outline" size={28} color={color} />
+// Tab bar icon components defined outside to avoid recreation on each render
+const LibraryTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} size={30} color={'white'} />
 );
 
-const HomeIcon = ({ color }: { color: string }) => (
-  <Ionicons name="home-outline" size={28} color={color} />
+const HomeTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'home' : 'home-outline'} size={30} color={'white'} />
 );
 
-const ProfileIcon = ({ color }: { color: string }) => (
-  <Ionicons name="person-circle-outline" size={28} color={color} />
+const ProfileTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'person' : 'person-outline'} size={30} color={'white'} />
 );
 
-const AdminIcon = ({ color }: { color: string }) => (
-  <Ionicons name="construct-outline" size={28} color={color} />
+const AdminTabIcon = ({ focused }: { focused: boolean }) => (
+  <Ionicons name={focused ? 'settings' : 'settings-outline'} size={30} color={'white'} />
 );
-
-// options def
-const libraryOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <LibraryIcon color={color} />,
-};
-
-const homeOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <HomeIcon color={color} />,
-};
-
-const profileOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <ProfileIcon color={color} />,
-};
-
-const adminOptions = {
-  tabBarIcon: ({ color }: { color: string }) => <AdminIcon color={color} />,
-};
 
 export default function BottomTabNavigator() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -84,30 +67,21 @@ export default function BottomTabNavigator() {
         name="Library"
         component={LibraryScreen}
         options={{
-          ...libraryOptions,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} size={30} color={'white'} />
-          ),
+          tabBarIcon: LibraryTabIcon,
         }}
       />
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          ...homeOptions,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={30} color={'white'} />
-          ),
+          tabBarIcon: HomeTabIcon,
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          ...profileOptions,
-          tabBarIcon: ({ focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={30} color={'white'} />
-          ),
+          tabBarIcon: ProfileTabIcon,
         }}
       />
       {isAdmin && (
@@ -115,14 +89,7 @@ export default function BottomTabNavigator() {
           name="Admin"
           component={AdminScreen}
           options={{
-            ...adminOptions,
-            tabBarIcon: ({ focused }) => (
-              <Ionicons
-                name={focused ? 'settings' : 'settings-outline'}
-                size={30}
-                color={'white'}
-              />
-            ),
+            tabBarIcon: AdminTabIcon,
           }}
         />
       )}
