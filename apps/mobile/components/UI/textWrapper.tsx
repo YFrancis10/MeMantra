@@ -12,7 +12,6 @@ export default function AppText(props: Readonly<TextProps>) {
 const styles = StyleSheet.create({
   text: {
     fontFamily: 'LibreBaskerville-Regular',
-    fontSize: 16, // You can adjust the default size
-    color: '#222', // Optional: set a default color
+    color: '#222',
   },
 });
