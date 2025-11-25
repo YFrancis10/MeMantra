@@ -34,7 +34,7 @@ describe('ProfileScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    (storage.getUserData as jest.Mock).mockResolvedValue({ username: 'testuser' });
+    (storage.getUserData as jest.Mock).mockResolvedValue({ username: 'memantrauser' });
     (storage.getToken as jest.Mock).mockResolvedValue('mock-token');
   });
 
@@ -46,7 +46,7 @@ describe('ProfileScreen', () => {
     const { getByText } = render(<ProfileScreen />);
 
     await waitFor(() => {
-      expect(getByText('testuser')).toBeTruthy();
+      expect(getByText('memantrauser')).toBeTruthy();
       expect(getByText('Update Email')).toBeTruthy();
       expect(getByText('Update Password')).toBeTruthy();
       expect(getByText('Delete Account')).toBeTruthy();
