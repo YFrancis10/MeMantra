@@ -161,16 +161,6 @@ const mockMantraService = {
     };
   },
 
-  async likeMantra(mantraId: number, _token: string) {
-    mockUserState.likedMantras.add(mantraId);
-    return { status: 'success', message: 'Liked successfully' };
-  },
-
-  async unlikeMantra(mantraId: number, _token: string) {
-    mockUserState.likedMantras.delete(mantraId);
-    return { status: 'success', message: 'Unliked successfully' };
-  },
-
   async saveMantra(mantraId: number, _token: string) {
     mockUserState.savedMantras.add(mantraId);
     return { status: 'success', message: 'Saved successfully' };
@@ -264,24 +254,6 @@ const mockMantraService = {
 const realMantraService = {
   async getFeedMantras(token: string): Promise<MantraResponse> {
     const response = await apiClient.get<MantraResponse>('/mantras/feed', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  },
-
-  async likeMantra(mantraId: number, token: string) {
-    const response = await apiClient.post(
-      `/mantras/like`,
-      { mantra_id: mantraId },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
-    return response.data;
-  },
-
-  async unlikeMantra(mantraId: number, token: string) {
-    const response = await apiClient.delete(`/mantras/like/${mantraId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
