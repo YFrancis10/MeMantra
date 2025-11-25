@@ -11,10 +11,8 @@ type ProfileNavProp = StackNavigationProp<RootStackParamList>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<ProfileNavProp>();
-
   const [username, setUsername] = useState<string>('');
 
-  //Show the user's username
   useEffect(() => {
     const load = async () => {
       const user = await storage.getUserData();
@@ -23,70 +21,53 @@ export default function ProfileScreen() {
     load();
   }, []);
 
-  const handleLogout = async () => {
-    await logoutUser(navigation);
-  };
-
-  const handleUpdateEmail = () => {
-    navigation.navigate('UpdateEmail');
-  };
-
-  const handleUpdatePassword = () => {
-    navigation.navigate('UpdatePassword');
-  };
-
-  const handleDeleteAccount = async () => {
+  const confirmDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
       'Are you absolutely sure you want to permanently delete your account? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            void (async () => {
-              try {
-                const token = await storage.getToken();
-                if (!token) {
-                  Alert.alert('Error', 'Not authenticated.');
-                  return;
-                }
-
-                await authService.deleteAccount(token);
-
-                Alert.alert(
-                  'Account Deleted',
-                  'Your account has been deleted. You will now be logged out.',
-                  [
-                    {
-                      text: 'OK',
-                      onPress: () => {
-                        void logoutUser(navigation);
-                      },
-                    },
-                  ],
-                );
-              } catch (err: any) {
-                console.error('Delete account error:', err);
-                Alert.alert('Error', err?.response?.data?.message || 'Failed to delete account.');
-              }
-            })();
-          },
-        },
+        { text: 'Delete', style: 'destructive', onPress: deleteAccount },
       ],
     );
   };
 
+  const deleteAccount = async () => {
+    try {
+      const token = await storage.getToken();
+
+      if (!token) {
+        Alert.alert('Error', 'Not authenticated.');
+        return;
+      }
+
+      await authService.deleteAccount(token);
+      showDeletedAlert();
+    } catch (err: any) {
+      console.error('Delete account error:', err);
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to delete account.');
+    }
+  };
+
+  const showDeletedAlert = () => {
+    Alert.alert('Account Deleted', 'Your account has been deleted. You will now be logged out.', [
+      { text: 'OK', onPress: () => logoutUser(navigation) },
+    ]);
+  };
+
+  const handleLogout = () => logoutUser(navigation);
+
   return (
     <View style={styles.container}>
-      {/* USERNAME HEADER */}
       <Text style={styles.name}>{username}</Text>
 
       <View style={styles.optionsContainer}>
-        <ProfileOption label="Update Email" onPress={handleUpdateEmail} />
-        <ProfileOption label="Update Password" onPress={handleUpdatePassword} />
-        <ProfileOption label="Delete Account" onPress={handleDeleteAccount} destructive />
+        <ProfileOption label="Update Email" onPress={() => navigation.navigate('UpdateEmail')} />
+        <ProfileOption
+          label="Update Password"
+          onPress={() => navigation.navigate('UpdatePassword')}
+        />
+        <ProfileOption label="Delete Account" onPress={confirmDeleteAccount} destructive />
         <ProfileOption label="Sign Out" onPress={handleLogout} />
       </View>
     </View>
