@@ -27,11 +27,16 @@ export default function ProfileScreen() {
       'Are you absolutely sure you want to permanently delete your account? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: deleteAccount },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteAccount();
+          },
+        },
       ],
     );
   };
-
   const deleteAccount = async () => {
     try {
       const token = await storage.getToken();
@@ -51,7 +56,12 @@ export default function ProfileScreen() {
 
   const showDeletedAlert = () => {
     Alert.alert('Account Deleted', 'Your account has been deleted. You will now be logged out.', [
-      { text: 'OK', onPress: () => logoutUser(navigation) },
+      {
+        text: 'OK',
+        onPress: () => {
+          logoutUser(navigation);
+        },
+      },
     ]);
   };
 
