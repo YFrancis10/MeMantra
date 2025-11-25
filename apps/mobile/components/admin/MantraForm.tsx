@@ -1,6 +1,8 @@
 import React from 'react';
-import { Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import AppText from '../UI/textWrapper';
+import AppTextInput from '../UI/textInputWrapper';
 
 interface MantraFormProps {
   formData: {
@@ -31,11 +33,11 @@ export default function MantraForm({
 
   return (
     <ScrollView className="flex-1 bg-white/10 rounded-3xl p-5" showsVerticalScrollIndicator={false}>
-      <Text className="text-white text-lg font-semibold mb-3">
+      <AppText className="text-white text-lg font-semibold mb-3">
         {isEdit ? 'Edit Mantra' : 'Add a new mantra'}
-      </Text>
+      </AppText>
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Title *"
         placeholderTextColor="#d9d9d9"
@@ -45,7 +47,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Key Takeaway *"
         placeholderTextColor="#d9d9d9"
@@ -57,7 +59,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff', minHeight: 100, textAlignVertical: 'top' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Background Author"
         placeholderTextColor="#d9d9d9"
@@ -67,7 +69,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Background Description"
         placeholderTextColor="#d9d9d9"
@@ -79,7 +81,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff', minHeight: 100, textAlignVertical: 'top' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Jamie's Take"
         placeholderTextColor="#d9d9d9"
@@ -91,7 +93,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff', minHeight: 150, textAlignVertical: 'top' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="When & Where"
         placeholderTextColor="#d9d9d9"
@@ -103,7 +105,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff', minHeight: 100, textAlignVertical: 'top' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="Negative Thoughts It Replaces"
         placeholderTextColor="#d9d9d9"
@@ -115,7 +117,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff', minHeight: 100, textAlignVertical: 'top' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-3 text-base"
         placeholder="CBT Principles"
         placeholderTextColor="#d9d9d9"
@@ -127,7 +129,7 @@ export default function MantraForm({
         style={{ backgroundColor: '#ffffff', minHeight: 150, textAlignVertical: 'top' }}
       />
 
-      <TextInput
+      <AppTextInput
         className="rounded-2xl px-4 py-3 mb-4 text-base"
         placeholder="References"
         placeholderTextColor="#d9d9d9"
@@ -149,9 +151,12 @@ export default function MantraForm({
         {submitting ? (
           <ActivityIndicator color={colors.primaryDark} />
         ) : (
-          <Text className="text-center text-lg font-semibold" style={{ color: colors.primaryDark }}>
+          <AppText
+            className="text-center text-lg font-semibold"
+            style={{ color: colors.primaryDark }}
+          >
             {isEdit ? 'Update Mantra' : 'Add Mantra'}
-          </Text>
+          </AppText>
         )}
       </TouchableOpacity>
     </ScrollView>

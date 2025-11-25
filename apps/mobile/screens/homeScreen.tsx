@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
-  TouchableOpacity,
   Dimensions,
   ActivityIndicator,
-  Text,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
@@ -15,12 +14,15 @@ import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
 import { logoutUser } from '../utils/auth';
+import AppText from '../components/UI/textWrapper';
+import { useTheme } from '../context/ThemeContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
   const [feedData, setFeedData] = useState<Mantra[]>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
 
   useEffect(() => {
     loadMantras();
@@ -89,11 +91,7 @@ export default function HomeScreen({ navigation }: any) {
 
   const handleLogout = () => logoutUser(navigation);
 
-  //TODO: Implement search functionality
-  const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
-    // TODO: Implement your search logic
-  };
+  const handleSearch = (query: string) => console.log('Searching for:', query);
 
   const handleUserPress = () => {
     Alert.alert(
@@ -101,35 +99,51 @@ export default function HomeScreen({ navigation }: any) {
       'Are you sure you want to log out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Log out', style: 'destructive', onPress: () => void handleLogout() },
+        {
+          text: 'Log out',
+          style: 'destructive',
+          onPress: () => {
+            void handleLogout();
+          },
+        },
       ],
       { cancelable: true },
     );
   };
 
-  // Determine what to render based on loading state and feed data (SonarQube)
   let content;
 
   if (loading) {
     content = (
-      <View className="flex-1 bg-[#9AA793] justify-center items-center">
-        <ActivityIndicator size="large" color="#E6D29C" />
-        <Text className="text-white mt-4 text-base">Loading mantras...</Text>
+      <View
+        className="flex-1 justify-center items-center"
+        style={{ backgroundColor: colors.primary }}
+      >
+        <ActivityIndicator size="large" color={colors.secondary} />
+        <AppText className="mt-4 text-base" style={{ color: colors.text }}>
+          Loading mantras...
+        </AppText>
       </View>
     );
   } else if (feedData.length === 0) {
     content = (
-      <View className="flex-1 bg-[#9AA793] justify-center items-center px-6">
-        <Ionicons name="book-outline" size={64} color="#E6D29C" />
-        <Text className="text-white mt-4 text-lg font-semibold text-center">
+      <View
+        className="flex-1 justify-center items-center px-6"
+        style={{ backgroundColor: colors.primary }}
+      >
+        <Ionicons name="book-outline" size={64} color={colors.secondary} />
+        <AppText className="mt-4 text-lg font-semibold text-center" style={{ color: colors.text }}>
           No mantras available
-        </Text>
+        </AppText>
         <TouchableOpacity
-          className="bg-[#E6D29C] rounded-full px-6 py-3 mt-6"
+          className="rounded-full px-6 py-3 mt-6"
           onPress={loadMantras}
           accessibilityRole="button"
+          style={{ backgroundColor: colors.secondary }}
         >
-          <Text className="text-[#6D7E68] font-semibold text-base">Refresh</Text>
+          <AppText className="font-semibold text-base" style={{ color: colors.primary }}>
+            Refresh
+          </AppText>
         </TouchableOpacity>
       </View>
     );
@@ -138,7 +152,18 @@ export default function HomeScreen({ navigation }: any) {
       <FlatList
         data={feedData}
         renderItem={({ item }) => (
-          <MantraCarousel item={item} onLike={handleLike} onSave={handleSave} />
+          <MantraCarousel
+            item={item}
+            onLike={handleLike}
+            onSave={handleSave}
+            onPress={() =>
+              navigation.navigate('Focus', {
+                mantra: item,
+                onLike: handleLike,
+                onSave: handleSave,
+              })
+            }
+          />
         )}
         keyExtractor={(item) => item.mantra_id.toString()}
         pagingEnabled
@@ -151,14 +176,12 @@ export default function HomeScreen({ navigation }: any) {
   }
 
   return (
-    <View className="flex-1 bg-[#9AA793]">
-      {/* Header */}
+    <View className="flex-1" style={{ backgroundColor: colors.primary }}>
       <View className="absolute top-5 left-0 right-0 z-10 flex-row justify-between items-center px-6 pt-14 pb-4">
         <SearchBar onSearch={handleSearch} placeholder="Search mantras..." />
         <IconButton type="profile" onPress={handleUserPress} testID="profile-btn" />
       </View>
 
-      {/* Main content */}
       {content}
     </View>
   );
