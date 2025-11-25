@@ -103,7 +103,7 @@ describe('BottomTabNavigator', () => {
     const { getByText } = render(<BottomTabNavigator />);
 
     await waitFor(() => expect(getByText('Admin')).toBeTruthy());
-    expect(getByText('construct-outline-white')).toBeTruthy();
+    expect(getByText('settings-outline-white')).toBeTruthy();
     expect(getByText('Admin Screen')).toBeTruthy();
   });
 });
