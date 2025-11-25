@@ -22,10 +22,20 @@ jest.mock('bcryptjs');
 
 const app = express();
 app.use(express.json());
+
+// Middleware to mock authenticated user
+const mockAuthMiddleware = (req: any, _res: any, next: any) => {
+  req.user = { userId: 1 };
+  next();
+};
+
 app.post('/register', AuthController.register);
 app.post('/login', AuthController.login);
 app.get('/me', AuthController.getMe);
 app.post('/google-auth', AuthController.googleAuth);
+app.put('/update-password', mockAuthMiddleware, AuthController.updatePassword);
+app.delete('/delete-account', mockAuthMiddleware, AuthController.deleteAccount);
+app.put('/update-email', mockAuthMiddleware, AuthController.updateEmail);
 
 describe('AuthController', () => {
   beforeEach(() => {
@@ -483,6 +493,189 @@ it('should generate token with empty email if user.email is missing on login', a
   expect(jwtUtils.generateToken).toHaveBeenCalledWith({
     userId: 42,
     email: '',
+  });
+});
+
+describe('updatePassword', () => {
+  it('should update password successfully', async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue('newhashed');
+    (UserModel.update as jest.Mock).mockResolvedValue(undefined);
+
+    const res = await request(app)
+      .put('/update-password')
+      .send({ password: 'newpassword123' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      status: 'success',
+      message: 'Password updated',
+    });
+    expect(bcrypt.hash).toHaveBeenCalledWith('newpassword123', 10);
+    expect(UserModel.update).toHaveBeenCalledWith(1, { password_hash: 'newhashed' });
+  });
+
+  it('should return 400 if password is missing', async () => {
+    const res = await request(app)
+      .put('/update-password')
+      .send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Password required',
+    });
+  });
+
+  it('should handle errors during password update', async () => {
+    (bcrypt.hash as jest.Mock).mockRejectedValue(new Error('Hash error'));
+
+    const res = await request(app)
+      .put('/update-password')
+      .send({ password: 'newpassword123' });
+
+    expect(res.status).toBe(500);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Failed to update password',
+    });
+  });
+});
+
+describe('deleteAccount', () => {
+  it('should delete account successfully', async () => {
+    (UserModel.delete as jest.Mock).mockResolvedValue(undefined);
+
+    const res = await request(app).delete('/delete-account');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      status: 'success',
+      message: 'Account deleted',
+    });
+    expect(UserModel.delete).toHaveBeenCalledWith(1);
+  });
+
+  it('should handle errors during account deletion', async () => {
+    (UserModel.delete as jest.Mock).mockRejectedValue(new Error('Delete error'));
+
+    const res = await request(app).delete('/delete-account');
+
+    expect(res.status).toBe(500);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Failed to delete account',
+    });
+  });
+});
+
+describe('updateEmail', () => {
+  it('should update email successfully', async () => {
+    (UserModel.findByEmail as jest.Mock).mockResolvedValue(null);
+    (UserModel.updateEmail as jest.Mock).mockResolvedValue(undefined);
+
+    const res = await request(app)
+      .put('/update-email')
+      .send({ email: 'newemail@example.com' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      status: 'success',
+      message: 'Email updated successfully',
+      data: { email: 'newemail@example.com' },
+    });
+    expect(UserModel.updateEmail).toHaveBeenCalledWith(1, 'newemail@example.com');
+  });
+
+  it('should return 401 if user is not authenticated', async () => {
+    const appNoAuth = express();
+    appNoAuth.use(express.json());
+    appNoAuth.put('/update-email', (req: any, _res: any, next: any) => {
+      req.user = undefined;
+      next();
+    }, AuthController.updateEmail);
+
+    const res = await request(appNoAuth)
+      .put('/update-email')
+      .send({ email: 'newemail@example.com' });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Not authenticated',
+    });
+  });
+
+  it('should return 400 if email is missing', async () => {
+    const res = await request(app)
+      .put('/update-email')
+      .send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Invalid email',
+    });
+  });
+
+  it('should return 400 if email is not a string', async () => {
+    const res = await request(app)
+      .put('/update-email')
+      .send({ email: 123 });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Invalid email',
+    });
+  });
+
+  it('should return 400 if email already in use by another user', async () => {
+    (UserModel.findByEmail as jest.Mock).mockResolvedValue({
+      user_id: 2,
+      email: 'existing@example.com',
+    });
+
+    const res = await request(app)
+      .put('/update-email')
+      .send({ email: 'existing@example.com' });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Email already in use',
+    });
+  });
+
+  it('should allow updating to the same email (current user)', async () => {
+    (UserModel.findByEmail as jest.Mock).mockResolvedValue({
+      user_id: 1,
+      email: 'myemail@example.com',
+    });
+    (UserModel.updateEmail as jest.Mock).mockResolvedValue(undefined);
+
+    const res = await request(app)
+      .put('/update-email')
+      .send({ email: 'myemail@example.com' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      status: 'success',
+      message: 'Email updated successfully',
+    });
+  });
+
+  it('should handle errors during email update', async () => {
+    (UserModel.findByEmail as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+    const res = await request(app)
+      .put('/update-email')
+      .send({ email: 'newemail@example.com' });
+
+    expect(res.status).toBe(500);
+    expect(res.body).toMatchObject({
+      status: 'error',
+      message: 'Error updating email',
+    });
   });
 });
 

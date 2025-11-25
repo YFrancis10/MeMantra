@@ -44,30 +44,34 @@ export default function ProfileScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              const token = await storage.getToken();
-              if (!token) {
-                Alert.alert('Error', 'Not authenticated.');
-                return;
+          onPress: () => {
+            void (async () => {
+              try {
+                const token = await storage.getToken();
+                if (!token) {
+                  Alert.alert('Error', 'Not authenticated.');
+                  return;
+                }
+
+                await authService.deleteAccount(token);
+
+                Alert.alert(
+                  'Account Deleted',
+                  'Your account has been deleted. You will now be logged out.',
+                  [
+                    {
+                      text: 'OK',
+                      onPress: () => {
+                        void logoutUser(navigation);
+                      },
+                    },
+                  ],
+                );
+              } catch (err: any) {
+                console.error('Delete account error:', err);
+                Alert.alert('Error', err?.response?.data?.message || 'Failed to delete account.');
               }
-
-              await authService.deleteAccount(token);
-
-              Alert.alert(
-                'Account Deleted',
-                'Your account has been deleted. You will now be logged out.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => logoutUser(navigation),
-                  },
-                ],
-              );
-            } catch (err: any) {
-              console.error('Delete account error:', err);
-              Alert.alert('Error', err?.response?.data?.message || 'Failed to delete account.');
-            }
+            })();
           },
         },
       ],
