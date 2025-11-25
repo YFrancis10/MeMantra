@@ -4,10 +4,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ThemeProvider } from '../context/ThemeContext';
 import { storage } from '../utils/storage';
 
-// Import your screens
+// Import screens
 import Login from '../screens/login';
 import Signup from '../screens/SignUp';
+import ProfileScreen from '../screens/ProfileScreen';
 import BottomTabNavigator from '../components/bottomTabNavigator';
+import UpdateEmailScreen from '../screens/UpdateEmailScreen';
+import UpdatePasswordScreen from '../screens/UpdatePasswordScreen';
 import FocusScreen from '../screens/focusScreen';
 
 const Stack = createStackNavigator();
@@ -58,6 +61,11 @@ export default function MainNavigator() {
         <Stack.Screen name="MainApp" component={BottomTabNavigator} />
         <Stack.Screen name="Login" component={Login} options={{ headerTitle: 'Login' }} />
         <Stack.Screen name="Signup" component={Signup} options={{ headerTitle: 'Signup' }} />
+
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="UpdateEmail" component={UpdateEmailScreen} />
+        <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
+
         <Stack.Screen
           name="Focus"
           component={FocusScreen}

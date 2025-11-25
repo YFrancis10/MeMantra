@@ -13,6 +13,7 @@ import { mantraService, Mantra } from '../services/mantra.service';
 import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
+import { logoutUser } from '../utils/auth';
 import AppText from '../components/UI/textWrapper';
 import { useTheme } from '../context/ThemeContext';
 
@@ -88,29 +89,7 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      if (typeof storage.removeToken === 'function') {
-        await storage.removeToken();
-      } else if (typeof storage.saveToken === 'function') {
-        await storage.saveToken('');
-      }
-
-      if (typeof storage.removeUserData === 'function') {
-        await storage.removeUserData();
-      } else if (typeof storage.saveUserData === 'function') {
-        await storage.saveUserData(null);
-      }
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } catch (err) {
-      console.error('Logout error:', err);
-      Alert.alert('Error', 'Failed to log out. Please try again.');
-    }
-  };
+  const handleLogout = () => logoutUser(navigation);
 
   const handleSearch = (query: string) => console.log('Searching for:', query);
 
@@ -131,6 +110,7 @@ export default function HomeScreen({ navigation }: any) {
       { cancelable: true },
     );
   };
+
   let content;
 
   if (loading) {
@@ -194,6 +174,7 @@ export default function HomeScreen({ navigation }: any) {
       />
     );
   }
+
   return (
     <View className="flex-1" style={{ backgroundColor: colors.primary }}>
       <View className="absolute top-5 left-0 right-0 z-10 flex-row justify-between items-center px-6 pt-14 pb-4">
@@ -201,7 +182,6 @@ export default function HomeScreen({ navigation }: any) {
         <IconButton type="profile" onPress={handleUserPress} testID="profile-btn" />
       </View>
 
-      {/* Dynamic content */}
       {content}
     </View>
   );

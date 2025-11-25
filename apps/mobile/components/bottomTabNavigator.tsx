@@ -6,6 +6,7 @@ import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
 import { storage } from '../utils/storage';
 import { isAdminEmail } from '../utils/admin';
+import ProfileScreen from '../screens/ProfileScreen';
 import AppText from './UI/textWrapper';
 
 const Tab = createBottomTabNavigator();
@@ -102,14 +103,6 @@ function LibraryScreen() {
   return (
     <View style={styles.screenContainer}>
       <AppText>Library Screen</AppText>
-    </View>
-  );
-}
-
-function ProfileScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <AppText>Profile Screen</AppText>
     </View>
   );
 }
