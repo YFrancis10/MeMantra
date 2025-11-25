@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { authService } from '../services/auth.service';
 import { storage } from '../utils/storage';
 import { logoutUser } from '../utils/auth';
+import { profileSettingsStyles as styles } from '../styles/profileSettings.styles';
+import AppText from '../components/UI/textWrapper';
+import AppTextInput from '../components/UI/textInputWrapper';
 
 export default function UpdatePasswordScreen() {
   const navigation = useNavigation();
@@ -37,7 +40,8 @@ export default function UpdatePasswordScreen() {
           },
         ],
       );
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Update password error:', err);
       Alert.alert('Error', 'Failed to update password.');
     }
   };
@@ -46,12 +50,12 @@ export default function UpdatePasswordScreen() {
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Text style={styles.backText}>← Back</Text>
+        <AppText style={styles.backText}>← Back</AppText>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Update Password</Text>
+      <AppText style={styles.title}>Update Password</AppText>
 
-      <TextInput
+      <AppTextInput
         style={styles.input}
         secureTextEntry
         placeholder="New password"
@@ -60,7 +64,7 @@ export default function UpdatePasswordScreen() {
         onChangeText={setPassword}
       />
 
-      <TextInput
+      <AppTextInput
         style={styles.input}
         secureTextEntry
         placeholder="Confirm password"
@@ -70,34 +74,8 @@ export default function UpdatePasswordScreen() {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-        <Text style={styles.buttonText}>Save Password</Text>
+        <AppText style={styles.buttonText}>Save Password</AppText>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#A8B3A2', padding: 20, paddingTop: 80 },
-  backButton: { marginBottom: 10 },
-  backText: {
-    fontSize: 18,
-    fontFamily: 'Red_Hat_Text-SemiBold',
-    color: 'white',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    fontFamily: 'Red_Hat_Text-Bold',
-    color: 'white',
-    marginBottom: 40,
-    textAlign: 'center',
-  },
-  input: { backgroundColor: '#fff', padding: 16, borderRadius: 12, fontSize: 17, marginBottom: 25 },
-  button: { backgroundColor: '#6D7E68', padding: 16, borderRadius: 12 },
-  buttonText: {
-    color: 'white',
-    fontFamily: 'Red_Hat_Text-SemiBold',
-    fontSize: 18,
-    textAlign: 'center',
-  },
-});
