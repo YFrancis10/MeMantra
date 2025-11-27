@@ -9,6 +9,19 @@ import * as expo from 'expo';
 // Mock CSS imports
 jest.mock('../global.css', () => ({}));
 
+// Mock storage
+jest.mock('../utils/storage', () => ({
+  storage: {
+    clearAll: jest.fn().mockResolvedValue(undefined),
+    getToken: jest.fn().mockResolvedValue(null),
+    saveToken: jest.fn().mockResolvedValue(undefined),
+    removeToken: jest.fn().mockResolvedValue(undefined),
+    getUserData: jest.fn().mockResolvedValue(null),
+    saveUserData: jest.fn().mockResolvedValue(undefined),
+    removeUserData: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 // Mock NavigationContainer
 jest.mock('@react-navigation/native', () => ({
   NavigationContainer: ({ children }: { children: React.ReactNode }) => children,

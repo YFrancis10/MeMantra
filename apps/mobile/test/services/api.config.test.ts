@@ -35,14 +35,37 @@ describe('api.config', () => {
       Platform: { OS: platform },
     }));
 
+    const mockStorage = {
+      clearAll: jest.fn().mockResolvedValue(undefined),
+      getToken: jest.fn().mockResolvedValue(null),
+      saveToken: jest.fn().mockResolvedValue(undefined),
+      removeToken: jest.fn().mockResolvedValue(undefined),
+      getUserData: jest.fn().mockResolvedValue(null),
+      saveUserData: jest.fn().mockResolvedValue(undefined),
+      removeUserData: jest.fn().mockResolvedValue(undefined),
+    };
+
+    jest.doMock('../../utils/storage', () => ({
+      storage: mockStorage,
+    }));
+
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     let apiClient: any;
+    let setNavigationRef: any;
     jest.isolateModules(() => {
-      ({ apiClient } = require('../../services/api.config'));
+      ({ apiClient, setNavigationRef } = require('../../services/api.config'));
     });
 
-    return { mockCreate, apiClient, requestHandlers, responseHandlers, consoleSpy };
+    return {
+      mockCreate,
+      apiClient,
+      setNavigationRef,
+      requestHandlers,
+      responseHandlers,
+      consoleSpy,
+      mockStorage,
+    };
   };
 
   it('configures base URL for Android', () => {
@@ -74,14 +97,28 @@ describe('api.config', () => {
   });
 
   it('returns responses and handles unauthorized errors', async () => {
-    const { responseHandlers, consoleSpy } = loadModule('android');
+    const { responseHandlers, setNavigationRef, consoleSpy, mockStorage } = loadModule('android');
     const handler = responseHandlers[0];
 
     const response = { data: 'ok' };
     expect(handler.fulfilled(response)).toBe(response);
 
+    // Mock navigation
+    const mockNavigationReset = jest.fn();
+    const mockNavigation = { reset: mockNavigationReset };
+    setNavigationRef(mockNavigation);
+
     const error = { response: { status: 401 } };
     await expect(handler.rejected(error)).rejects.toThrow(JSON.stringify(error));
+
+    // Verify storage was cleared
+    expect(mockStorage.clearAll).toHaveBeenCalled();
+
+    // Verify navigation was reset to Login
+    expect(mockNavigationReset).toHaveBeenCalledWith({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
 
     consoleSpy.mockRestore();
   });
