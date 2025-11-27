@@ -65,9 +65,6 @@ apiClient.interceptors.response.use(
         });
       }
     }
-    return Promise.reject(
-      // Ensure we always reject with an Error (SonarQube)
-      error instanceof Error ? error : new Error(JSON.stringify(error)),
-    );
+    throw error instanceof Error ? error : new Error(JSON.stringify(error));
   },
 );
