@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
+import { storage } from '../utils/storage';
 
 const getBaseUrl = () => {
   //if android
@@ -25,6 +26,13 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
+// Navigation ref to handle logout navigation
+let navigationRef: any = null;
+
+export const setNavigationRef = (ref: any) => {
+  navigationRef = ref;
+};
+
 //request to attach jwt token
 apiClient.interceptors.request.use(
   async (config: any) => {
@@ -38,9 +46,24 @@ apiClient.interceptors.request.use(
 //handle errors
 apiClient.interceptors.response.use(
   (response: any) => response,
-  (error: { response: { status: number } }) => {
+  async (error: { response: { status: number } }) => {
     if (error.response?.status === 401) {
-      console.log('Unauthorized access');
+      console.log('Unauthorized access - token expired or invalid');
+
+      // Clear stored authentication data
+      try {
+        await storage.clearAll();
+      } catch (storageError) {
+        console.error('Failed to clear storage:', storageError);
+      }
+
+      // Navigate to login screen if navigation ref is available
+      if (navigationRef) {
+        navigationRef.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      }
     }
     return Promise.reject(
       // Ensure we always reject with an Error (SonarQube)
