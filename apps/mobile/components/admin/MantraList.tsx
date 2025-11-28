@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { Mantra } from '../../services/mantra.service';
+import AppText from '../UI/textWrapper';
 
 interface MantraListProps {
   mantras: Mantra[];
@@ -24,7 +25,7 @@ export default function MantraList({
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator color={colors.secondary} />
-        <Text className="text-white/80 mt-3">Loading mantras...</Text>
+        <AppText className="text-white/80 mt-3">Loading mantras...</AppText>
       </View>
     );
   }
@@ -32,7 +33,7 @@ export default function MantraList({
   if (mantras.length === 0) {
     return (
       <View className="flex-1 items-center justify-center py-16">
-        <Text className="text-white/80 text-base text-center">No mantras available.</Text>
+        <AppText className="text-white/80 text-base text-center">No mantras available.</AppText>
       </View>
     );
   }
@@ -48,13 +49,13 @@ export default function MantraList({
           style={{ backgroundColor: `${colors.primaryDark}33` }}
         >
           <View className="flex-1 pr-3">
-            <Text className="text-white text-lg font-semibold" numberOfLines={1}>
+            <AppText className="text-white text-lg font-semibold" numberOfLines={1}>
               {item.title}
-            </Text>
+            </AppText>
             {item.key_takeaway ? (
-              <Text className="text-white/80 text-sm mt-1" numberOfLines={2}>
+              <AppText className="text-white/80 text-sm mt-1" numberOfLines={2}>
                 {item.key_takeaway}
-              </Text>
+              </AppText>
             ) : null}
           </View>
           <View className="flex-row gap-2">
@@ -64,9 +65,9 @@ export default function MantraList({
               style={{ backgroundColor: colors.secondary }}
               onPress={() => onEdit(item)}
             >
-              <Text className="text-base font-semibold" style={{ color: colors.primaryDark }}>
+              <AppText className="text-base font-semibold" style={{ color: colors.primaryDark }}>
                 Edit
-              </Text>
+              </AppText>
             </TouchableOpacity>
             <TouchableOpacity
               accessibilityRole="button"
@@ -78,7 +79,7 @@ export default function MantraList({
               {deletingId === item.mantra_id ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-base font-semibold text-white">Delete</Text>
+                <AppText className="text-base font-semibold text-white">Delete</AppText>
               )}
             </TouchableOpacity>
           </View>
