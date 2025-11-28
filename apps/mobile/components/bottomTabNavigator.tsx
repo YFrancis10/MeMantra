@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
+import bookmarkScreen from '../screens/bookmarkScreen';
 import { storage } from '../utils/storage';
 import { isAdminEmail } from '../utils/admin';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -66,7 +67,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen
         name="Library"
-        component={LibraryScreen}
+        component={bookmarkScreen}
         options={{
           tabBarIcon: LibraryTabIcon,
         }}
@@ -98,14 +99,14 @@ export default function BottomTabNavigator() {
   );
 }
 
-// Placeholder screens
-function LibraryScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <AppText>Library Screen</AppText>
-    </View>
-  );
-}
+// // Placeholder screens
+// function LibraryScreen() {
+//   return (
+//     <View style={styles.screenContainer}>
+//       <AppText>Library Screen</AppText>
+//     </View>
+//   );
+// }
 
 const styles = StyleSheet.create({
   screenContainer: {

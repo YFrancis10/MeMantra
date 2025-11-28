@@ -180,6 +180,12 @@ const mockMantraService = {
     mockUserState.savedMantras.delete(mantraId);
     return { status: 'success', message: 'Removed from saved' };
   },
+  async getSavedMantras(token: string) {
+    const response = await apiClient.get('/mantras/save', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
   async createMantra(
     mantraData: CreateMantraPayload,
     _token: string,
@@ -289,8 +295,8 @@ const realMantraService = {
 
   async saveMantra(mantraId: number, token: string) {
     const response = await apiClient.post(
-      `/mantras/save`,
-      { mantra_id: mantraId },
+      `/mantras/${mantraId}/save`,
+      {},
       {
         headers: { Authorization: `Bearer ${token}` },
       },
@@ -299,7 +305,14 @@ const realMantraService = {
   },
 
   async unsaveMantra(mantraId: number, token: string) {
-    const response = await apiClient.delete(`/mantras/save/${mantraId}`, {
+    const response = await apiClient.delete(`/mantras/${mantraId}/save/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+
+  async getSavedMantras(token: string) {
+    const response = await apiClient.get('/mantras/save', {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
