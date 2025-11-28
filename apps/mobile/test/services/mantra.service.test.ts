@@ -77,8 +77,9 @@ jest.mock('../../services/api.config', () => ({
         mockState.likedMantras.add(body.mantra_id);
         return Promise.resolve({ data: { status: 'success', message: 'Liked successfully' } });
       }
-      if (url === '/mantras/save') {
-        mockState.savedMantras.add(body.mantra_id);
+      if (url.match(/^\/mantras\/\d+\/save$/)) {
+        const mantraId = Number(url.split('/')[2]);
+        mockState.savedMantras.add(mantraId);
         return Promise.resolve({ data: { status: 'success', message: 'Saved successfully' } });
       }
       if (url === '/mantras') {
@@ -110,9 +111,10 @@ jest.mock('../../services/api.config', () => ({
         mockState.likedMantras.delete(id);
         return Promise.resolve({ data: { status: 'success', message: 'Unliked successfully' } });
       }
-      if (url.startsWith('/mantras/save')) {
-        const id = Number(url.split('/').pop());
-        mockState.savedMantras.delete(id);
+      if (url.match(/^\/mantras\/\d+\/save\/?$/)) {
+        const parts = url.split('/');
+        const mantraId = Number(parts[2]);
+        mockState.savedMantras.delete(mantraId);
         return Promise.resolve({ data: { status: 'success', message: 'Removed from saved' } });
       }
       if (/^\/mantras\/\d+$/.test(url)) {
