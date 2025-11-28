@@ -8,6 +8,7 @@ import splashLogo from './assets/logo.png';
 import './global.css';
 import LibreBaskerville from './assets/fonts/LibreBaskerville-Regular.ttf';
 import * as Font from 'expo-font';
+import { setNavigationRef } from './services/api.config';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,6 +16,7 @@ export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const navigationRef = useRef<any>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -65,7 +67,12 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <NavigationContainer>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => {
+          setNavigationRef(navigationRef.current);
+        }}
+      >
         <MainNavigator />
       </NavigationContainer>
       {isSplashVisible && (
