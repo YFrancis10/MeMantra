@@ -279,14 +279,12 @@ async getFeedMantras(req: Request, res: Response) {
       const allCollections = await CollectionModel.findByUserId(userId);
       let savedCollection = allCollections.find(c => c.name === 'Saved Mantras');
 
-      if (!savedCollection) {
-        // Create default collection for this user
-        savedCollection = await CollectionModel.create(
-          userId,
-          'Saved Mantras',
-          'Your saved mantras'
-        );
-      }
+      savedCollection ??= await CollectionModel.create(
+  userId,
+  'Saved Mantras',
+  'Your saved mantras'
+);
+
 
       // 5. Check if mantra is already saved (prevent duplicates)
       const isAlreadySaved = await CollectionModel.isMantraInCollection(
