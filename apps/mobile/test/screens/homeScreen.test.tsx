@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import HomeScreen from '../../screens/homeScreen';
 import { mantraService } from '../../services/mantra.service';
 import { storage } from '../../utils/storage';
+import { SavedProvider } from '../../context/SavedContext';
 
 jest.mock('../../components/carousel', () => {
   const React = jest.requireActual('react');
@@ -50,7 +51,11 @@ describe('HomeScreen - Full Coverage', () => {
   const mockNavigate = jest.fn();
 
   const setup = () =>
-    render(<HomeScreen navigation={{ navigate: mockNavigate, reset: mockReset }} />);
+    render(
+      <SavedProvider>
+        <HomeScreen navigation={{ navigate: mockNavigate, reset: mockReset }} />
+      </SavedProvider>
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
