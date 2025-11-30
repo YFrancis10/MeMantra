@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ThemeProvider } from '../context/ThemeContext';
+import { SavedProvider } from '../context/SavedContext';
 import { storage } from '../utils/storage';
 
 // Import screens
@@ -51,37 +52,39 @@ export default function MainNavigator() {
 
   return (
     <ThemeProvider>
-      <Stack.Navigator
-        initialRouteName={isLoggedIn ? 'MainApp' : 'Login'}
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        {/* Always register MainApp so Login can navigate to it */}
-        <Stack.Screen name="MainApp" component={BottomTabNavigator} />
-        <Stack.Screen name="Login" component={Login} options={{ headerTitle: 'Login' }} />
-        <Stack.Screen name="Signup" component={Signup} options={{ headerTitle: 'Signup' }} />
-
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="UpdateEmail" component={UpdateEmailScreen} />
-        <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
-
-        <Stack.Screen
-          name="Focus"
-          component={FocusScreen}
-          options={{
-            cardStyleInterpolator: ({ current }) => ({
-              cardStyle: {
-                opacity: current.progress,
-              },
-            }),
-            transitionSpec: {
-              open: { animation: 'timing', config: { duration: 450 } },
-              close: { animation: 'timing', config: { duration: 350 } },
-            },
+      <SavedProvider>
+        <Stack.Navigator
+          initialRouteName={isLoggedIn ? 'MainApp' : 'Login'}
+          screenOptions={{
+            headerShown: false,
           }}
-        />
-      </Stack.Navigator>
+        >
+          {/* Always register MainApp so Login can navigate to it */}
+          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+          <Stack.Screen name="Login" component={Login} options={{ headerTitle: 'Login' }} />
+          <Stack.Screen name="Signup" component={Signup} options={{ headerTitle: 'Signup' }} />
+
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="UpdateEmail" component={UpdateEmailScreen} />
+          <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
+
+          <Stack.Screen
+            name="Focus"
+            component={FocusScreen}
+            options={{
+              cardStyleInterpolator: ({ current }) => ({
+                cardStyle: {
+                  opacity: current.progress,
+                },
+              }),
+              transitionSpec: {
+                open: { animation: 'timing', config: { duration: 450 } },
+                close: { animation: 'timing', config: { duration: 350 } },
+              },
+            }}
+          />
+        </Stack.Navigator>
+      </SavedProvider>
     </ThemeProvider>
   );
 }
