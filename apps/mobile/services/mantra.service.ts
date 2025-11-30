@@ -181,11 +181,13 @@ const mockMantraService = {
     return { status: 'success', message: 'Removed from saved' };
   },
   async getSavedMantras(token: string) {
-    const response = await apiClient.get('/mantras/save', {
+    const collectionId = 1;
+    const response = await apiClient.get(`/collections/${collectionId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return response.data.data.mantras;
   },
+
   async createMantra(
     mantraData: CreateMantraPayload,
     _token: string,
@@ -312,10 +314,11 @@ const realMantraService = {
   },
 
   async getSavedMantras(token: string) {
-    const response = await apiClient.get('/mantras/save', {
+    const collectionId = 1;
+    const response = await apiClient.get(`/collections/${collectionId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return response.data.data.mantras;
   },
   async createMantra(
     mantraData: CreateMantraPayload,
