@@ -143,11 +143,13 @@ let mockMantras: Mantra[] = [...INITIAL_MOCK_MANTRAS];
  * ------------
  * Simulates backend responses with delays and mock state.
  */
+/* istanbul ignore next */
 const mockUserState = {
   likedMantras: new Set<number>(),
   savedMantras: new Set<number>(),
 };
 
+/* istanbul ignore next */
 const mockMantraService = {
   async getFeedMantras(_token: string): Promise<MantraResponse> {
     await new Promise((resolve) => setTimeout(resolve, 600));
