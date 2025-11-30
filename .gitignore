@@ -3,6 +3,8 @@ package.json
 pnpm-lock.yaml
 lock.yaml
 
+.expo/
+
 # Logs
 logs
 *.log

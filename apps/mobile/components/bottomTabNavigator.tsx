@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
+import bookmarkScreen from '../screens/bookmarkScreen';
 import { storage } from '../utils/storage';
 import { isAdminEmail } from '../utils/admin';
 import ProfileScreen from '../screens/ProfileScreen';
-import AppText from './UI/textWrapper';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,7 +66,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen
         name="Library"
-        component={LibraryScreen}
+        component={bookmarkScreen}
         options={{
           tabBarIcon: LibraryTabIcon,
         }}
@@ -95,15 +95,6 @@ export default function BottomTabNavigator() {
         />
       )}
     </Tab.Navigator>
-  );
-}
-
-// Placeholder screens
-function LibraryScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <AppText>Library Screen</AppText>
-    </View>
   );
 }
 

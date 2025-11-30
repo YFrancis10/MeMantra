@@ -15,7 +15,7 @@ const router = Router();
 
 
 
-// Feed route (
+// Feed route
 router.get(
   '/feed',
   authenticate,
@@ -26,6 +26,19 @@ router.get(
 router.get(
   '/popular',
   MantraController.getPopularMantras
+);
+
+// Save/Unsave mantra (bookmark functionality)
+router.post(
+  '/:mantraId/save',
+  authenticate,
+  MantraController.saveMantra
+);
+
+router.delete(
+  '/:mantraId/save',
+  authenticate,
+  MantraController.unsaveMantra
 );
 
 // Category filter
