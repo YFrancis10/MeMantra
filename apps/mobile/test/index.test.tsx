@@ -12,6 +12,15 @@ jest.mock('../context/ThemeContext', () => ({
   ThemeProvider: ({ children }: any) => children,
 }));
 
+jest.mock('../context/SavedContext', () => ({
+  SavedProvider: ({ children }: any) => children,
+  useSavedMantras: jest.fn(() => ({
+    savedMantras: [],
+    addMantra: jest.fn(),
+    removeMantra: jest.fn(),
+  })),
+}));
+
 jest.mock('../utils/storage', () => ({
   storage: {
     getToken: jest.fn(),
