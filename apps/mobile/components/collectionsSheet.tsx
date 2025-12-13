@@ -93,6 +93,7 @@ export default function CollectionsSheet({
     await onCreateCollection(name);
     setNewName('');
     setIsCreating(false);
+    closeSheet();
   };
 
   const handleSelect = async (id: number) => {
