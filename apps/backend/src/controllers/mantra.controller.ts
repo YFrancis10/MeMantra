@@ -376,4 +376,44 @@ async getFeedMantras(req: Request, res: Response) {
       });
     }
   },
+
+  async getSavedMantras(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Authentication required',
+      });
+    }
+
+    // Find user's "Saved Mantras" collection
+    const allCollections = await CollectionModel.findByUserId(userId);
+    const savedCollection = allCollections.find(c => c.name === 'Saved Mantras');
+
+    // If no saved collection exists yet, return empty array
+    if (!savedCollection) {
+      return res.status(200).json({
+        status: 'success',
+        data: [],
+      });
+    }
+
+    // Get all mantras in the saved collection
+    const mantras = await CollectionModel.getMantrasInCollection(savedCollection.collection_id);
+
+    return res.status(200).json({
+      status: 'success',
+      data: mantras,
+    });
+  } catch (error) {
+    console.error('Get saved mantras error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Error retrieving saved mantras',
+    });
+  }
+},
 };
+

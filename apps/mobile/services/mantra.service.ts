@@ -315,12 +315,11 @@ const realMantraService = {
     return response.data;
   },
 
-  async getSavedMantras(token: string) {
-    const collectionId = 1;
-    const response = await apiClient.get(`/collections/${collectionId}`, {
+  async getSavedMantras(token: string): Promise<Mantra[]> {
+    const response = await apiClient.get('/mantras/saved', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data.data.mantras;
+    return response.data.data;
   },
   async createMantra(
     mantraData: CreateMantraPayload,
