@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import AppText from '../components/UI/textWrapper';
-import { storage } from '../utils/storage';
-import { mantraService, Mantra } from '../services/mantra.service';
+import { Mantra } from '../services/mantra.service';
 import { useSavedMantras } from '../context/SavedContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -13,21 +12,7 @@ const ITEM_SIZE = (SCREEN_WIDTH - ITEM_MARGIN * (NUM_COLUMNS + 1)) / NUM_COLUMNS
 
 export default function BookmarkScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { savedMantras, setSavedMantras } = useSavedMantras();
-
-  useEffect(() => {
-    loadSavedMantras();
-  }, []);
-
-  const loadSavedMantras = async () => {
-    try {
-      const token = await storage.getToken();
-      const res = await mantraService.getSavedMantras(token || 'mock-token');
-      setSavedMantras(res);
-    } catch (err) {
-      console.log('Error fetching saved mantras:', err);
-    }
-  };
+  const { savedMantras } = useSavedMantras();
 
   const renderItem = ({ item }: { item: Mantra }) => (
     <TouchableOpacity

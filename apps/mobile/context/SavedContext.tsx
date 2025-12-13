@@ -1,8 +1,6 @@
-// context/savedContext.tsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Mantra } from '../services/mantra.service';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
+import { Mantra, mantraService } from '../services/mantra.service';
 import { storage } from '../utils/storage';
-import { mantraService } from '../services/mantra.service';
 
 type SavedContextType = {
   savedMantras: Mantra[];
@@ -25,16 +23,16 @@ export const SavedProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  //load saved mantras on mount
   useEffect(() => {
     loadSavedMantras();
   }, []);
 
-  return (
-    <SavedContext.Provider value={{ savedMantras, setSavedMantras, loadSavedMantras }}>
-      {children}
-    </SavedContext.Provider>
+  const value = useMemo(
+    () => ({ savedMantras, setSavedMantras, loadSavedMantras }),
+    [savedMantras],
   );
+
+  return <SavedContext.Provider value={value}>{children}</SavedContext.Provider>;
 };
 
 export const useSavedMantras = () => {

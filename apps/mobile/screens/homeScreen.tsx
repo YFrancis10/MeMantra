@@ -67,7 +67,7 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  const { savedMantras, setSavedMantras } = useSavedMantras();
+  const { setSavedMantras } = useSavedMantras();
 
   const handleSave = async (mantraId: number) => {
     try {
