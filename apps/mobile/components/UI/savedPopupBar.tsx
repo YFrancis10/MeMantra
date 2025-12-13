@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Text, Pressable } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Animated, Text, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -20,8 +19,6 @@ export default function SavedPopupBar({
   onPressCollections,
 }: SavedPopupBarProps) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
-
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(10)).current;
 
@@ -38,13 +35,10 @@ export default function SavedPopupBar({
 
   useEffect(() => {
     if (!visible) return;
-
     animateTo(1);
-
     const timer = setTimeout(() => {
       animateTo(0, onHide);
     }, durationMs);
-
     return () => clearTimeout(timer);
   }, [visible, durationMs, onHide]);
 
@@ -54,7 +48,7 @@ export default function SavedPopupBar({
     <Animated.View
       className="absolute left-4 right-4 rounded-xl px-4 py-4 border flex-row items-center justify-between"
       style={{
-        bottom: insets.bottom,
+        bottom: Platform.OS === 'ios' ? 34 : 16,
         opacity,
         transform: [{ translateY }],
         backgroundColor: colors.secondary,

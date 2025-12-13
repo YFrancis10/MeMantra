@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Modal,
@@ -42,7 +42,6 @@ export default function CollectionsSheet({
   onCreateCollection,
   title = 'Save to collection',
 }: Props) {
-  const insets = useSafeAreaInsets();
   const slide = useRef(new Animated.Value(0)).current;
   const dragY = useRef(new Animated.Value(0)).current;
   const [isCreating, setIsCreating] = useState(false);
@@ -134,7 +133,7 @@ export default function CollectionsSheet({
             ],
             backgroundColor: '#FFF',
             borderColor: '#E5E7EB',
-            paddingBottom: insets.bottom + 14,
+            paddingBottom: Platform.OS === 'ios' ? 34 : 20,
             maxHeight: MAX_H,
           }}
         >
