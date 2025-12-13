@@ -48,6 +48,11 @@ router.get(
   MantraController.getMantrasByCategory
 );
 
+router.get(
+  '/saved', 
+  authenticate, 
+  MantraController.getSavedMantras);
+
 // List all mantras (public)
 router.get(
   '/',

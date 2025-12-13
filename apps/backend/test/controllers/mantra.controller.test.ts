@@ -14,9 +14,11 @@ function setupAppWithUser(userId?: number, email?: string) {
     if (userId) req.user = { userId, email: email ?? '' };
     next();
   });
-  app.get('/mantras', MantraController.getAllMantras);
+
   app.get('/mantras/popular', MantraController.getPopularMantras);
   app.get('/mantras/category/:categoryId', MantraController.getMantrasByCategory);
+  app.get('/mantras/saved', MantraController.getSavedMantras);
+  app.get('/mantras', MantraController.getAllMantras);
   app.get('/mantras/:id', MantraController.getMantraById);
   app.post('/mantras', MantraController.createMantra);
   app.put('/mantras/:id', MantraController.updateMantra);
@@ -569,6 +571,74 @@ describe('MantraController', () => {
       expect(res.body).toMatchObject({
         status: 'error',
         message: 'Error unsaving mantra',
+      });
+    });
+  });
+
+  describe('getSavedMantras', () => {
+    it('should get saved mantras when collection exists', async () => {
+      const mockCollection = {
+        collection_id: 10,
+        user_id: 1,
+        name: 'Saved Mantras',
+        description: 'Your saved mantras',
+      };
+      const mockMantras = [
+        { mantra_id: 1, title: 'Saved Mantra 1', key_takeaway: 'Takeaway 1' },
+        { mantra_id: 2, title: 'Saved Mantra 2', key_takeaway: 'Takeaway 2' },
+      ];
+
+      (CollectionModel.findByUserId as jest.Mock).mockResolvedValue([mockCollection]);
+      (CollectionModel.getMantrasInCollection as jest.Mock).mockResolvedValue(mockMantras);
+
+      const app = setupAppWithUser(1, 'test@test.com');
+      const res = await request(app).get('/mantras/saved');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        status: 'success',
+        data: mockMantras,
+      });
+      expect(CollectionModel.findByUserId).toHaveBeenCalledWith(1);
+      expect(CollectionModel.getMantrasInCollection).toHaveBeenCalledWith(10);
+    });
+
+    it('should return empty array when saved collection does not exist', async () => {
+      (CollectionModel.findByUserId as jest.Mock).mockResolvedValue([]);
+
+      const app = setupAppWithUser(1, 'test@test.com');
+      const res = await request(app).get('/mantras/saved');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        status: 'success',
+        data: [],
+      });
+      expect(CollectionModel.findByUserId).toHaveBeenCalledWith(1);
+      expect(CollectionModel.getMantrasInCollection).not.toHaveBeenCalled();
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      const app = setupAppWithUser();
+      const res = await request(app).get('/mantras/saved');
+
+      expect(res.status).toBe(401);
+      expect(res.body).toMatchObject({
+        status: 'error',
+        message: 'Authentication required',
+      });
+    });
+
+    it('should handle errors', async () => {
+      (CollectionModel.findByUserId as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      const app = setupAppWithUser(1, 'test@test.com');
+      const res = await request(app).get('/mantras/saved');
+
+      expect(res.status).toBe(500);
+      expect(res.body).toMatchObject({
+        status: 'error',
+        message: 'Error retrieving saved mantras',
       });
     });
   });
