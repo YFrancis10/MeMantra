@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Text } from 'react-native';
+import { Animated, Text, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
 type SavedPopupBarProps = {
@@ -8,6 +9,7 @@ type SavedPopupBarProps = {
   message?: string;
   onHide: () => void;
   durationMs?: number;
+  onPressCollections: () => void;
 };
 
 export default function SavedPopupBar({
@@ -15,6 +17,7 @@ export default function SavedPopupBar({
   message = 'Saved successfully',
   onHide,
   durationMs = 2000,
+  onPressCollections,
 }: SavedPopupBarProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -49,8 +52,7 @@ export default function SavedPopupBar({
 
   return (
     <Animated.View
-      pointerEvents="none"
-      className="absolute left-4 right-4 rounded-xl px-4 py-4 border"
+      className="absolute left-4 right-4 rounded-xl px-4 py-4 border flex-row items-center justify-between"
       style={{
         bottom: insets.bottom,
         opacity,
@@ -59,9 +61,21 @@ export default function SavedPopupBar({
         borderColor: colors.secondary,
       }}
     >
+      {/* Left text */}
       <Text className="text-[15px] font-bold" style={{ color: colors.primaryDark ?? '#fff' }}>
         {message}
       </Text>
+
+      {/* Right collections arrow */}
+      <Pressable onPress={onPressCollections} hitSlop={10} className="flex-row items-center">
+        <Text
+          className="mr-1 text-[16px] font-semibold underline"
+          style={{ color: colors.primaryDark ?? '#fff' }}
+        >
+          Collections
+        </Text>
+        <Ionicons name="chevron-forward" size={20} color={colors.primaryDark ?? '#fff'} />
+      </Pressable>
     </Animated.View>
   );
 }

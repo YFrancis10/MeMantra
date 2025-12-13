@@ -18,6 +18,7 @@ import AppText from '../components/UI/textWrapper';
 import { useTheme } from '../context/ThemeContext';
 import { useSavedMantras } from '../context/SavedContext';
 import SavedPopupBar from '../components/UI/savedPopupBar';
+import CollectionsSheet, { Collection } from '../components/collectionsSheet';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -25,6 +26,13 @@ export default function HomeScreen({ navigation }: any) {
   const [feedData, setFeedData] = useState<Mantra[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSavedPopup, setShowSavedPopup] = useState(false);
+  const [showCollectionsSheet, setShowCollectionsSheet] = useState(false);
+
+  // TEMP: replace with backend fetch later
+  const [collections, setCollections] = useState<Collection[]>([
+    { collection_id: 1, name: 'Saved', description: 'Default collection' },
+  ]);
+
   const { colors } = useTheme();
 
   useEffect(() => {
@@ -199,7 +207,25 @@ export default function HomeScreen({ navigation }: any) {
       <SavedPopupBar
         visible={showSavedPopup}
         onHide={() => setShowSavedPopup(false)}
-        message="Saved successfully"
+        onPressCollections={() => {
+          setShowSavedPopup(false);
+          setShowCollectionsSheet(true);
+        }}
+      />
+      <CollectionsSheet
+        visible={showCollectionsSheet}
+        collections={collections}
+        onClose={() => setShowCollectionsSheet(false)}
+        onSelectCollection={async (collectionId) => {
+          //next steps bellow... when ready to be connected to backend
+          console.log('Selected collection:', collectionId);
+        }}
+        onCreateCollection={async (name) => {
+          console.log('Create collection:', name);
+
+          // TEMP local add
+          setCollections((prev) => [{ collection_id: Date.now(), name }, ...prev]);
+        }}
       />
     </View>
   );
