@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Modal,
@@ -12,7 +12,6 @@ import {
   PanResponder,
   Dimensions,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type Collection = {
   collection_id: number;
@@ -25,7 +24,7 @@ type Props = {
   collections: Collection[];
   onClose: () => void;
   onSelectCollection: (collectionId: number) => void | Promise<void>;
-  onCreateCollection: (name: string) => void | Promise<void>;
+  onCreateCollection: (name: string) => Promise<number>;
   title?: string;
 };
 
@@ -89,14 +88,24 @@ export default function CollectionsSheet({
   const handleCreate = async () => {
     const name = newName.trim();
     if (!name) return;
-    await onCreateCollection(name);
+
+    // Create collection and get the new collection ID
+    const newCollectionId = await onCreateCollection(name);
+
     setNewName('');
     setIsCreating(false);
+
+    // Automatically add the mantra to the newly created collection
+    await onSelectCollection(newCollectionId);
+    console.log(`Mantra added to new collection: "${name}" (ID: ${newCollectionId})`);
+
     closeSheet();
   };
 
   const handleSelect = async (id: number) => {
+    const collection = collections.find((c) => c.collection_id === id);
     await onSelectCollection(id);
+    console.log(`Mantra added to collection: "${collection?.name}" (ID: ${id})`);
     closeSheet();
   };
 

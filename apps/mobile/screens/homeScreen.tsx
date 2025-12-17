@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
@@ -27,6 +28,7 @@ export default function HomeScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [showSavedPopup, setShowSavedPopup] = useState(false);
   const [showCollectionsSheet, setShowCollectionsSheet] = useState(false);
+  const [collectionToast, setCollectionToast] = useState('');
 
   // TEMP: replace with backend fetch later
   const [collections, setCollections] = useState<Collection[]>([
@@ -217,16 +219,27 @@ export default function HomeScreen({ navigation }: any) {
         collections={collections}
         onClose={() => setShowCollectionsSheet(false)}
         onSelectCollection={async (collectionId) => {
-          //next steps bellow... when ready to be connected to backend
-          console.log('Selected collection:', collectionId);
+          const collection = collections.find((c) => c.collection_id === collectionId);
+          setCollectionToast(collection?.name || 'collection');
+          setTimeout(() => setCollectionToast(''), 2000);
         }}
         onCreateCollection={async (name) => {
-          console.log('Create collection:', name);
-
-          // TEMP local add
-          setCollections((prev) => [{ collection_id: Date.now(), name }, ...prev]);
+          const newId = Date.now();
+          setCollections((prev) => [{ collection_id: newId, name }, ...prev]);
+          return newId;
         }}
       />
+
+      {!!collectionToast && (
+        <View
+          className="absolute top-24 self-center rounded-full px-6 py-3 shadow-lg"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+        >
+          <Text className="text-base" style={{ color: '#111827' }}>
+            Added to {collectionToast}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
