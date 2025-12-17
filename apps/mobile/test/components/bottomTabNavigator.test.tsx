@@ -27,6 +27,12 @@ jest.mock('../../screens/homeScreen', () => {
   return () => React.createElement(Text, null, 'Mock Home Screen');
 });
 
+jest.mock('../../screens/bookmarkScreen', () => {
+  const React = jest.requireActual('react');
+  const { Text } = jest.requireActual('react-native');
+  return () => React.createElement(Text, null, 'Bookmark Screen');
+});
+
 jest.mock('../../screens/adminScreen', () => {
   const React = jest.requireActual('react');
   const { Text } = jest.requireActual('react-native');

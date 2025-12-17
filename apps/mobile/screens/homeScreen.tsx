@@ -16,6 +16,7 @@ import IconButton from '../components/UI/iconButton';
 import { logoutUser } from '../utils/auth';
 import AppText from '../components/UI/textWrapper';
 import { useTheme } from '../context/ThemeContext';
+import { useSavedMantras } from '../context/SavedContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -66,6 +67,8 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
+  const { setSavedMantras } = useSavedMantras();
+
   const handleSave = async (mantraId: number) => {
     try {
       const token = (await storage.getToken()) || 'mock-token';
@@ -77,8 +80,11 @@ export default function HomeScreen({ navigation }: any) {
 
       if (isCurrentlySaved) {
         await mantraService.unsaveMantra(mantraId, token);
+        setSavedMantras((prev) => prev.filter((m) => m.mantra_id !== mantraId));
       } else {
         await mantraService.saveMantra(mantraId, token);
+        const savedMantra = feedData.find((m) => m.mantra_id === mantraId);
+        if (savedMantra) setSavedMantras((prev) => [...prev, savedMantra]);
       }
     } catch (err) {
       console.error('Error toggling save:', err);

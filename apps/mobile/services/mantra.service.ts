@@ -143,11 +143,13 @@ let mockMantras: Mantra[] = [...INITIAL_MOCK_MANTRAS];
  * ------------
  * Simulates backend responses with delays and mock state.
  */
+/* istanbul ignore next */
 const mockUserState = {
   likedMantras: new Set<number>(),
   savedMantras: new Set<number>(),
 };
 
+/* istanbul ignore next */
 const mockMantraService = {
   async getFeedMantras(_token: string): Promise<MantraResponse> {
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -181,11 +183,13 @@ const mockMantraService = {
     return { status: 'success', message: 'Removed from saved' };
   },
   async getSavedMantras(token: string) {
-    const response = await apiClient.get('/mantras/save', {
+    const collectionId = 1;
+    const response = await apiClient.get(`/collections/${collectionId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return response.data.data.mantras;
   },
+
   async createMantra(
     mantraData: CreateMantraPayload,
     _token: string,
@@ -311,11 +315,11 @@ const realMantraService = {
     return response.data;
   },
 
-  async getSavedMantras(token: string) {
-    const response = await apiClient.get('/mantras/save', {
+  async getSavedMantras(token: string): Promise<Mantra[]> {
+    const response = await apiClient.get('/mantras/saved', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    return response.data.data;
   },
   async createMantra(
     mantraData: CreateMantraPayload,
