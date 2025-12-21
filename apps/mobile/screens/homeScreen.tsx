@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import MantraCarousel from '../components/carousel';
 import { mantraService, Mantra } from '../services/mantra.service';
+import { collectionService, Collection } from '../services/collection.service';
 import { storage } from '../utils/storage';
 import SearchBar from '../components/UI/searchBar';
 import IconButton from '../components/UI/iconButton';
@@ -19,7 +20,7 @@ import AppText from '../components/UI/textWrapper';
 import { useTheme } from '../context/ThemeContext';
 import { useSavedMantras } from '../context/SavedContext';
 import SavedPopupBar from '../components/UI/savedPopupBar';
-import CollectionsSheet, { Collection } from '../components/collectionsSheet';
+import CollectionsSheet from '../components/collectionsSheet';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -29,16 +30,16 @@ export default function HomeScreen({ navigation }: any) {
   const [showSavedPopup, setShowSavedPopup] = useState(false);
   const [showCollectionsSheet, setShowCollectionsSheet] = useState(false);
   const [collectionToast, setCollectionToast] = useState('');
-
-  // TEMP: replace with backend fetch later
-  const [collections, setCollections] = useState<Collection[]>([
-    { collection_id: 1, name: 'Saved', description: 'Default collection' },
-  ]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [currentMantraId, setCurrentMantraId] = useState<number | null>(null);
+  const [collectionsLoading, setCollectionsLoading] = useState(false);
 
   const { colors } = useTheme();
+  const { setSavedMantras } = useSavedMantras();
 
   useEffect(() => {
     loadMantras();
+    loadCollections();
   }, []);
 
   const loadMantras = async () => {
@@ -53,6 +54,19 @@ export default function HomeScreen({ navigation }: any) {
       console.error('Error fetching mantras:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCollections = async () => {
+    try {
+      const token = (await storage.getToken()) || 'mock-token';
+      const response = await collectionService.getUserCollections(token);
+
+      if (response.status === 'success' && response.data) {
+        setCollections(response.data.collections);
+      }
+    } catch (err) {
+      console.error('Error fetching collections:', err);
     }
   };
 
@@ -79,8 +93,6 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
-  const { setSavedMantras } = useSavedMantras();
-
   const handleSave = async (mantraId: number) => {
     try {
       const token = (await storage.getToken()) || 'mock-token';
@@ -93,12 +105,13 @@ export default function HomeScreen({ navigation }: any) {
       if (isCurrentlySaved) {
         await mantraService.unsaveMantra(mantraId, token);
         setSavedMantras((prev) => prev.filter((m) => m.mantra_id !== mantraId));
-        // no popup on unsave
       } else {
         await mantraService.saveMantra(mantraId, token);
         const savedMantra = feedData.find((m) => m.mantra_id === mantraId);
         if (savedMantra) setSavedMantras((prev) => [...prev, savedMantra]);
 
+        // Store the mantra ID and show popup + collections sheet
+        setCurrentMantraId(mantraId);
         setShowSavedPopup(true);
       }
     } catch (err) {
@@ -107,6 +120,53 @@ export default function HomeScreen({ navigation }: any) {
         prev.map((m) => (m.mantra_id === mantraId ? { ...m, isSaved: !m.isSaved } : m)),
       );
       Alert.alert('Error', 'Failed to update save status');
+    }
+  };
+
+  const handleSelectCollection = async (collectionId: number) => {
+    if (!currentMantraId) {
+      Alert.alert('Error', 'No mantra selected');
+      return;
+    }
+
+    try {
+      const token = (await storage.getToken()) || 'mock-token';
+      const response = await collectionService.addMantraToCollection(
+        collectionId,
+        currentMantraId,
+        token,
+      );
+
+      if (response.status === 'success') {
+        const collection = collections.find((c) => c.collection_id === collectionId);
+        setCollectionToast(collection?.name || 'collection');
+        setTimeout(() => setCollectionToast(''), 2000);
+      } else {
+        Alert.alert('Error', response.message || 'Failed to add to collection');
+      }
+    } catch (err) {
+      console.error('Error adding to collection:', err);
+      Alert.alert('Error', 'Failed to add mantra to collection');
+    }
+  };
+
+  const handleCreateCollection = async (name: string): Promise<number> => {
+    try {
+      const token = (await storage.getToken()) || 'mock-token';
+      const response = await collectionService.createCollection(name, undefined, token);
+
+      if (response.status === 'success' && response.data) {
+        const newCollection = response.data.collection;
+        setCollections((prev) => [newCollection, ...prev]);
+        return newCollection.collection_id;
+      } else {
+        Alert.alert('Error', response.message || 'Failed to create collection');
+        throw new Error('Failed to create collection');
+      }
+    } catch (err) {
+      console.error('Error creating collection:', err);
+      Alert.alert('Error', 'Failed to create collection');
+      throw err;
     }
   };
 
@@ -217,17 +277,12 @@ export default function HomeScreen({ navigation }: any) {
       <CollectionsSheet
         visible={showCollectionsSheet}
         collections={collections}
-        onClose={() => setShowCollectionsSheet(false)}
-        onSelectCollection={async (collectionId) => {
-          const collection = collections.find((c) => c.collection_id === collectionId);
-          setCollectionToast(collection?.name || 'collection');
-          setTimeout(() => setCollectionToast(''), 2000);
+        onClose={() => {
+          setShowCollectionsSheet(false);
+          setCurrentMantraId(null);
         }}
-        onCreateCollection={async (name) => {
-          const newId = Date.now();
-          setCollections((prev) => [{ collection_id: newId, name }, ...prev]);
-          return newId;
-        }}
+        onSelectCollection={handleSelectCollection}
+        onCreateCollection={handleCreateCollection}
       />
 
       {!!collectionToast && (

@@ -11,12 +11,15 @@ import {
   Platform,
   PanResponder,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 
 export type Collection = {
   collection_id: number;
   name: string;
   description?: string | null;
+  user_id?: number;
+  created_at?: string;
 };
 
 type Props = {
@@ -26,6 +29,7 @@ type Props = {
   onSelectCollection: (collectionId: number) => void | Promise<void>;
   onCreateCollection: (name: string) => Promise<number>;
   title?: string;
+  loading?: boolean;
 };
 
 const { height: H } = Dimensions.get('window');
@@ -40,12 +44,14 @@ export default function CollectionsSheet({
   onSelectCollection,
   onCreateCollection,
   title = 'Save to collection',
+  loading = false,
 }: Props) {
   const slide = useRef(new Animated.Value(0)).current;
   const dragY = useRef(new Animated.Value(0)).current;
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const closeSheet = () => {
     setIsDragging(false);
@@ -70,13 +76,15 @@ export default function CollectionsSheet({
       setIsCreating(false);
       setNewName('');
       setIsDragging(false);
+      setIsProcessing(false);
     }
   }, [visible]);
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 4 && Math.abs(g.dy) > Math.abs(g.dx),
+      onStartShouldSetPanResponder: () => !isProcessing,
+      onMoveShouldSetPanResponder: (_e, g) =>
+        !isProcessing && Math.abs(g.dy) > 4 && Math.abs(g.dy) > Math.abs(g.dx),
       onPanResponderGrant: () => setIsDragging(true),
       onPanResponderMove: (_e, g) => dragY.setValue(Math.max(-18, g.dy)),
       onPanResponderRelease: (_e, g) =>
@@ -87,31 +95,49 @@ export default function CollectionsSheet({
 
   const handleCreate = async () => {
     const name = newName.trim();
-    if (!name) return;
+    if (!name || isProcessing) return;
 
-    // Create collection and get the new collection ID
-    const newCollectionId = await onCreateCollection(name);
+    setIsProcessing(true);
 
-    setNewName('');
-    setIsCreating(false);
+    try {
+      // Create collection and get the new collection ID
+      const newCollectionId = await onCreateCollection(name);
 
-    // Automatically add the mantra to the newly created collection
-    await onSelectCollection(newCollectionId);
-    console.log(`Mantra added to new collection: "${name}" (ID: ${newCollectionId})`);
+      setNewName('');
+      setIsCreating(false);
 
-    closeSheet();
+      // Automatically add the mantra to the newly created collection
+      await onSelectCollection(newCollectionId);
+      console.log(`Mantra added to new collection: "${name}" (ID: ${newCollectionId})`);
+
+      closeSheet();
+    } catch (err) {
+      console.error('Error creating collection:', err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleSelect = async (id: number) => {
-    const collection = collections.find((c) => c.collection_id === id);
-    await onSelectCollection(id);
-    console.log(`Mantra added to collection: "${collection?.name}" (ID: ${id})`);
-    closeSheet();
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    try {
+      const collection = collections.find((c) => c.collection_id === id);
+      await onSelectCollection(id);
+      console.log(`Mantra added to collection: "${collection?.name}" (ID: ${id})`);
+      closeSheet();
+    } catch (err) {
+      console.error('Error selecting collection:', err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={closeSheet}>
-      <Pressable className="absolute inset-0" onPress={closeSheet}>
+      <Pressable className="absolute inset-0" onPress={isProcessing ? undefined : closeSheet}>
         <Animated.View
           className="absolute inset-0"
           style={{
@@ -168,22 +194,35 @@ export default function CollectionsSheet({
                 style={{ color: '#111827', borderColor: '#E5E7EB' }}
                 returnKeyType="done"
                 onSubmitEditing={handleCreate}
+                editable={!isProcessing}
               />
               <Pressable
                 onPress={handleCreate}
                 className="rounded-xl px-4 py-3 border"
-                style={{ borderColor: '#E5E7EB' }}
+                style={{
+                  borderColor: '#E5E7EB',
+                  opacity: isProcessing ? 0.5 : 1,
+                }}
+                disabled={isProcessing}
               >
-                <Text className="font-semibold" style={{ color: '#111827' }}>
-                  Create
-                </Text>
+                {isProcessing ? (
+                  <ActivityIndicator size="small" color="#111827" />
+                ) : (
+                  <Text className="font-semibold" style={{ color: '#111827' }}>
+                    Create
+                  </Text>
+                )}
               </Pressable>
             </View>
           ) : (
             <Pressable
               onPress={() => setIsCreating(true)}
               className="rounded-xl px-4 py-3 mb-3 border"
-              style={{ borderColor: '#E5E7EB' }}
+              style={{
+                borderColor: '#E5E7EB',
+                opacity: isProcessing ? 0.5 : 1,
+              }}
+              disabled={isProcessing}
             >
               <Text className="font-semibold" style={{ color: '#111827' }}>
                 + Create new collection
@@ -191,28 +230,47 @@ export default function CollectionsSheet({
             </Pressable>
           )}
 
-          <FlatList
-            data={collections}
-            keyExtractor={(c) => String(c.collection_id)}
-            showsVerticalScrollIndicator
-            scrollEnabled={!isDragging}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => handleSelect(item.collection_id)}
-                className="py-4 border-b"
-                style={{ borderBottomColor: '#E5E7EB' }}
-              >
-                <Text className="text-[15px] font-semibold" style={{ color: '#111827' }}>
-                  {item.name}
-                </Text>
-                {!!item.description && (
-                  <Text className="text-[12px] mt-1" style={{ color: '#6B7280' }}>
-                    {item.description}
+          {loading ? (
+            <View className="py-8 items-center">
+              <ActivityIndicator size="small" color="#111827" />
+              <Text className="mt-2 text-[13px]" style={{ color: '#6B7280' }}>
+                Loading collections...
+              </Text>
+            </View>
+          ) : collections.length === 0 ? (
+            <View className="py-8 items-center">
+              <Text className="text-[13px]" style={{ color: '#6B7280' }}>
+                No collections yet. Create one above!
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={collections}
+              keyExtractor={(c) => String(c.collection_id)}
+              showsVerticalScrollIndicator
+              scrollEnabled={!isDragging && !isProcessing}
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => handleSelect(item.collection_id)}
+                  className="py-4 border-b"
+                  style={{
+                    borderBottomColor: '#E5E7EB',
+                    opacity: isProcessing ? 0.5 : 1,
+                  }}
+                  disabled={isProcessing}
+                >
+                  <Text className="text-[15px] font-semibold" style={{ color: '#111827' }}>
+                    {item.name}
                   </Text>
-                )}
-              </Pressable>
-            )}
-          />
+                  {!!item.description && (
+                    <Text className="text-[12px] mt-1" style={{ color: '#6B7280' }}>
+                      {item.description}
+                    </Text>
+                  )}
+                </Pressable>
+              )}
+            />
+          )}
         </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
