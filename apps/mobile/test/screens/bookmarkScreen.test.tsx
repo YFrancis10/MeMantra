@@ -1,14 +1,18 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import BookmarkScreen from '../../screens/bookmarkScreen';
-import { mantraService } from '../../services/mantra.service';
 import { storage } from '../../utils/storage';
 import { SavedProvider } from '../../context/SavedContext';
+import { collectionService } from '../../services/collection.service';
 
-// Mock dependencies
-jest.mock('../../services/mantra.service', () => ({
-  mantraService: {
-    getSavedMantras: jest.fn(),
+jest.mock('@expo/vector-icons', () => ({
+  Ionicons: () => null,
+}));
+
+jest.mock('../../services/collection.service', () => ({
+  collectionService: {
+    getCollectionById: jest.fn(),
   },
 }));
 
@@ -24,13 +28,23 @@ jest.mock('../../context/ThemeContext', () => ({
       primary: '#1a1a1a',
       primaryDark: '#2a2a2a',
       text: '#ffffff',
+      secondary: '#ff9900',
     },
   }),
 }));
 
 describe('BookmarkScreen', () => {
   const mockNavigate = jest.fn();
-  const mockNavigation = { navigate: mockNavigate };
+  const mockGoBack = jest.fn();
+
+  const mockNavigation = { navigate: mockNavigate, goBack: mockGoBack };
+
+  const mockRoute = {
+    params: {
+      collectionId: 123,
+      collectionName: 'My Collection',
+    },
+  };
 
   const mockMantras = [
     {
@@ -52,39 +66,57 @@ describe('BookmarkScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (storage.getToken as jest.Mock).mockResolvedValue('test-token');
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    (Alert.alert as jest.Mock).mockRestore?.();
   });
 
   const renderScreen = () =>
     render(
       <SavedProvider>
-        <BookmarkScreen navigation={mockNavigation} />
+        <BookmarkScreen navigation={mockNavigation} route={mockRoute} />
       </SavedProvider>,
     );
 
-  it('renders the screen with title', async () => {
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue([]);
+  it('renders the screen with collection title', async () => {
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: [] },
+    });
+
     const { getByText } = renderScreen();
-    
+
     await waitFor(() => {
-      expect(getByText('Library')).toBeTruthy();
+      expect(getByText('My Collection')).toBeTruthy();
     });
   });
 
-  it('displays empty state when no saved mantras', async () => {
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue([]);
+  it('displays empty state when no mantras', async () => {
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: [] },
+    });
+
     const { getByText } = renderScreen();
 
     await waitFor(() => {
-      expect(getByText('You have no saved mantras yet.')).toBeTruthy();
+      expect(getByText('No Mantras Yet')).toBeTruthy();
+      expect(getByText('Save mantras to this collection to see them here')).toBeTruthy();
     });
   });
 
-  it('loads and displays saved mantras on mount', async () => {
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue(mockMantras);
+  it('loads and displays mantras on mount', async () => {
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: mockMantras },
+    });
+
     const { getByText } = renderScreen();
 
     await waitFor(() => {
-      expect(mantraService.getSavedMantras).toHaveBeenCalledWith('test-token');
+      expect(collectionService.getCollectionById).toHaveBeenCalledWith(123, 'test-token');
       expect(getByText('Test Mantra 1')).toBeTruthy();
       expect(getByText('Test Mantra 2')).toBeTruthy();
     });
@@ -92,34 +124,45 @@ describe('BookmarkScreen', () => {
 
   it('uses fallback token when getToken returns null', async () => {
     (storage.getToken as jest.Mock).mockResolvedValue(null);
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue([]);
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: [] },
+    });
+
     renderScreen();
 
     await waitFor(() => {
-      expect(mantraService.getSavedMantras).toHaveBeenCalledWith('mock-token');
+      expect(collectionService.getCollectionById).toHaveBeenCalledWith(123, 'mock-token');
     });
   });
 
-  it('handles error when loading saved mantras fails', async () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    (mantraService.getSavedMantras as jest.Mock).mockRejectedValue(
+  it('handles error when loading mantras fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    (collectionService.getCollectionById as jest.Mock).mockRejectedValue(
       new Error('Network error'),
     );
+
     const { getByText } = renderScreen();
 
     await waitFor(() => {
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'Error fetching saved mantras:',
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error fetching collection mantras:',
         expect.any(Error),
       );
-      expect(getByText('You have no saved mantras yet.')).toBeTruthy();
+      expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to load mantras');
+      // After error, it should show empty state (mantras stays empty)
+      expect(getByText('No Mantras Yet')).toBeTruthy();
     });
 
-    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   it('navigates to Focus screen when mantra is pressed', async () => {
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue(mockMantras);
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: mockMantras },
+    });
+
     const { getByText } = renderScreen();
 
     await waitFor(() => {
@@ -133,22 +176,8 @@ describe('BookmarkScreen', () => {
     });
   });
 
-  it('displays mantras in a grid layout', async () => {
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue(mockMantras);
-    const { getByText } = renderScreen();
-
-    await waitFor(() => {
-      expect(getByText('Test Mantra 1')).toBeTruthy();
-      expect(getByText('Test Mantra 2')).toBeTruthy();
-    });
-
-    // Both mantras should be visible
-    expect(getByText('Test Mantra 1')).toBeTruthy();
-    expect(getByText('Test Mantra 2')).toBeTruthy();
-  });
-
   it('truncates long mantra titles with numberOfLines prop', async () => {
-    const longTitleMantra = [
+    const longTitleMantras = [
       {
         mantra_id: 3,
         title: 'This is a very long mantra title that should be truncated after three lines',
@@ -157,27 +186,32 @@ describe('BookmarkScreen', () => {
         is_active: true,
       },
     ];
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue(longTitleMantra);
+
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: longTitleMantras },
+    });
+
     const { getByText } = renderScreen();
 
     await waitFor(() => {
-      const titleElement = getByText(
-        'This is a very long mantra title that should be truncated after three lines',
-      );
+      const titleElement = getByText(longTitleMantras[0].title);
       expect(titleElement.props.numberOfLines).toBe(3);
     });
   });
 
   it('renders each mantra with correct styling', async () => {
-    (mantraService.getSavedMantras as jest.Mock).mockResolvedValue(mockMantras);
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: mockMantras },
+    });
+
     const { getByText } = renderScreen();
 
     await waitFor(() => {
       const mantraText = getByText('Test Mantra 1');
-      // Check that the element has styling applied
       expect(mantraText.props.style).toBeDefined();
       expect(Array.isArray(mantraText.props.style)).toBe(true);
     });
   });
 });
-

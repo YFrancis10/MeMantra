@@ -22,7 +22,7 @@ const ITEM_SIZE = (SCREEN_WIDTH - ITEM_MARGIN * (NUM_COLUMNS + 1)) / NUM_COLUMNS
 
 export default function BookmarkScreen({ navigation, route }: any) {
   const { colors } = useTheme();
-  const { collectionId, collectionName } = route.params;
+  const { collectionId = 0, collectionName = '' } = route?.params ?? {};
 
   const [mantras, setMantras] = useState<Mantra[]>([]);
   const [loading, setLoading] = useState(true);
