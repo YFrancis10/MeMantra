@@ -28,6 +28,7 @@ type Props = {
   onClose: () => void;
   onSelectCollection: (collectionId: number) => void | Promise<void>;
   onCreateCollection: (name: string) => Promise<number>;
+  onRefresh?: () => void;
   title?: string;
   loading?: boolean;
 };
@@ -43,6 +44,7 @@ export default function CollectionsSheet({
   onClose,
   onSelectCollection,
   onCreateCollection,
+  onRefresh,
   title = 'Save to collection',
   loading = false,
 }: Props) {
@@ -70,6 +72,9 @@ export default function CollectionsSheet({
     if (visible) {
       dragY.setValue(0);
       Animated.timing(slide, { toValue: 1, duration: 260, useNativeDriver: true }).start();
+      if (onRefresh) {
+        onRefresh();
+      }
     } else {
       dragY.setValue(0);
       slide.setValue(0);

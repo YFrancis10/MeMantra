@@ -283,6 +283,7 @@ export default function HomeScreen({ navigation }: any) {
         }}
         onSelectCollection={handleSelectCollection}
         onCreateCollection={handleCreateCollection}
+        onRefresh={loadCollections}
       />
 
       {!!collectionToast && (

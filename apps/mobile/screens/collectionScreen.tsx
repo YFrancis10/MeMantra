@@ -67,39 +67,89 @@ export default function CollectionsScreen({ navigation }: any) {
     });
   };
 
+  const handleDeleteCollection = (collection: Collection) => {
+    Alert.alert(
+      'Delete Collection',
+      `Are you sure you want to delete "${collection.name}"? This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = (await storage.getToken()) || 'mock-token';
+              await collectionService.deleteCollection(collection.collection_id, token);
+
+              // Remove from local state
+              setCollections((prev) =>
+                prev.filter((c) => c.collection_id !== collection.collection_id),
+              );
+
+              Alert.alert('Success', 'Collection deleted successfully');
+            } catch (err) {
+              console.error('Error deleting collection:', err);
+              Alert.alert('Error', 'Failed to delete collection');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const renderItem = ({ item }: { item: Collection }) => (
-    <TouchableOpacity
-      className="justify-center items-center rounded-xl p-4"
+    <View
       style={{
         width: ITEM_SIZE,
-        height: ITEM_SIZE,
-        backgroundColor: colors.primaryDark,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 4,
+        marginBottom: ITEM_MARGIN,
       }}
-      onPress={() => handleCollectionPress(item)}
     >
-      <Ionicons name="folder" size={40} color={colors.secondary} className="mb-2" />
-      <AppText
-        className="text-base font-bold text-center mb-1"
-        style={{ color: colors.text }}
-        numberOfLines={2}
+      <TouchableOpacity
+        className="justify-center items-center rounded-xl p-4"
+        style={{
+          width: ITEM_SIZE,
+          height: ITEM_SIZE,
+          backgroundColor: colors.primaryDark,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 5,
+          elevation: 4,
+        }}
+        onPress={() => handleCollectionPress(item)}
       >
-        {item.name}
-      </AppText>
-      {item.description && (
+        <Ionicons name="folder" size={40} color={colors.secondary} className="mb-2" />
         <AppText
-          className="text-xs text-center"
-          style={{ color: colors.text, opacity: 0.7 }}
+          className="text-base font-bold text-center mb-1"
+          style={{ color: colors.text }}
           numberOfLines={2}
         >
-          {item.description}
+          {item.name}
         </AppText>
+        {item.description && (
+          <AppText
+            className="text-xs text-center"
+            style={{ color: colors.text, opacity: 0.7 }}
+            numberOfLines={2}
+          >
+            {item.description}
+          </AppText>
+        )}
+      </TouchableOpacity>
+
+      {/* Delete button - only show if not "Saved Mantras" */}
+      {item.name !== 'Saved Mantras' && (
+        <TouchableOpacity
+          className="absolute top-2 right-2 p-1"
+          onPress={() => handleDeleteCollection(item)}
+        >
+          <Ionicons name="remove" size={24} color="white" />
+        </TouchableOpacity>
       )}
-    </TouchableOpacity>
+    </View>
   );
 
   if (loading) {
@@ -149,9 +199,9 @@ export default function CollectionsScreen({ navigation }: any) {
           numColumns={NUM_COLUMNS}
           columnWrapperStyle={{
             justifyContent: 'space-between',
-            marginBottom: ITEM_MARGIN,
+            paddingHorizontal: ITEM_MARGIN,
           }}
-          contentContainerStyle={{ padding: ITEM_MARGIN }}
+          contentContainerStyle={{ paddingTop: ITEM_MARGIN }}
           refreshing={refreshing}
           onRefresh={handleRefresh}
         />

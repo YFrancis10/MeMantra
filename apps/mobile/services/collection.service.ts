@@ -1,5 +1,4 @@
 import { apiClient } from './api.config';
-
 import { Mantra } from './mantra.service';
 
 export type Collection = {
