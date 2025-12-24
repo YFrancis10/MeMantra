@@ -451,7 +451,7 @@ describe('CollectionsSheet', () => {
     mockOnSelectCollection.mockReturnValueOnce(selectPromise);
 
     const { getByText, getByTestId } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     // Start processing
     fireEvent.press(getByText('My Collection'));
 
@@ -478,10 +478,10 @@ describe('CollectionsSheet', () => {
     mockOnSelectCollection.mockReturnValueOnce(selectPromise);
 
     const { getByText } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     // Start processing by selecting a collection
     fireEvent.press(getByText('My Collection'));
-
+    
     // Try to open create form while processing
     fireEvent.press(getByText('+ Create new collection'));
 
@@ -502,16 +502,16 @@ describe('CollectionsSheet', () => {
     mockOnCreateCollection.mockReturnValueOnce(createPromise);
 
     const { getByText, getByPlaceholderText } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     fireEvent.press(getByText('+ Create new collection'));
 
     const input = getByPlaceholderText('New collection name');
     fireEvent.changeText(input, 'New Collection');
     fireEvent.press(getByText('Create'));
-
+    
     // Input should be disabled while processing
     expect(input.props.editable).toBe(false);
-
+    
     resolveCreate!();
     await waitFor(() => {
       expect(mockOnSelectCollection).toHaveBeenCalledWith(4);
@@ -527,11 +527,11 @@ describe('CollectionsSheet', () => {
         created_at: '2024-01-01',
       },
     ];
-
+    
     const { getByText, queryByText } = render(
       <CollectionsSheet {...defaultProps} collections={collectionsWithoutDesc} />,
     );
-
+    
     expect(getByText('No Description')).toBeTruthy();
     // Should not render description text
     expect(queryByText('undefined')).toBeNull();
@@ -539,11 +539,11 @@ describe('CollectionsSheet', () => {
 
   it('logs console message when collection is selected', async () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-
+    
     const { getByText } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     fireEvent.press(getByText('My Collection'));
-
+    
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(
         'Mantra added to collection: "My Collection" (ID: 2)',
@@ -555,13 +555,13 @@ describe('CollectionsSheet', () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
     const { getByText, getByPlaceholderText } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     fireEvent.press(getByText('+ Create new collection'));
 
     const input = getByPlaceholderText('New collection name');
     fireEvent.changeText(input, 'New Collection');
     fireEvent.press(getByText('Create'));
-
+    
     await waitFor(() => {
       expect(consoleLogSpy).toHaveBeenCalledWith(
         'Mantra added to new collection: "New Collection" (ID: 4)',
@@ -571,15 +571,15 @@ describe('CollectionsSheet', () => {
 
   it('does not close sheet when selecting collection fails', async () => {
     mockOnSelectCollection.mockRejectedValueOnce(new Error('Selection failed'));
-
+    
     const { getByText } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     fireEvent.press(getByText('My Collection'));
-
+    
     await waitFor(() => {
       expect(mockOnSelectCollection).toHaveBeenCalled();
     });
-
+    
     // Sheet should not close on error
     expect(mockOnClose).not.toHaveBeenCalled();
   });
@@ -588,13 +588,13 @@ describe('CollectionsSheet', () => {
     mockOnCreateCollection.mockRejectedValueOnce(new Error('Creation failed'));
 
     const { getByText, getByPlaceholderText } = render(<CollectionsSheet {...defaultProps} />);
-
+    
     fireEvent.press(getByText('+ Create new collection'));
 
     const input = getByPlaceholderText('New collection name');
     fireEvent.changeText(input, 'New Collection');
     fireEvent.press(getByText('Create'));
-
+    
     await waitFor(() => {
       expect(mockOnCreateCollection).toHaveBeenCalled();
     });
