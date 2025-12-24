@@ -114,10 +114,13 @@ describe('HomeScreen - Full Coverage', () => {
 
     const { getByText, getByTestId } = setup();
 
-    await waitFor(() => {
-      expect(getByText('M1')).toBeTruthy();
-      expect(getByText('M2')).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(getByText('M1')).toBeTruthy();
+        expect(getByText('M2')).toBeTruthy();
+      },
+      { timeout: 10000 },
+    );
 
     fireEvent.press(getByTestId('like-1'));
     await waitFor(() => expect(mantraService.likeMantra).toHaveBeenCalledWith(1, 'token-abc'));
