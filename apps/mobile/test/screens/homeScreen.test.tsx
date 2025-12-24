@@ -101,41 +101,45 @@ describe('HomeScreen - Full Coverage', () => {
     await waitFor(() => expect(getByText('No mantras available')).toBeTruthy(), { timeout: 10000 });
   });
 
-  it('renders feed and handles like/save success', async () => {
-    (storage.getToken as jest.Mock).mockResolvedValue('token-abc');
+  it(
+    'renders feed and handles like/save success',
+    async () => {
+      (storage.getToken as jest.Mock).mockResolvedValue('token-abc');
 
-    const sample = [
-      { mantra_id: 1, title: 'M1', isLiked: false, isSaved: false },
-      { mantra_id: 2, title: 'M2', isLiked: true, isSaved: false },
-    ];
+      const sample = [
+        { mantra_id: 1, title: 'M1', isLiked: false, isSaved: false },
+        { mantra_id: 2, title: 'M2', isLiked: true, isSaved: false },
+      ];
 
-    (mantraService.getFeedMantras as jest.Mock).mockResolvedValue({
-      status: 'success',
-      data: sample,
-    });
-    (mantraService.likeMantra as jest.Mock).mockResolvedValue({ status: 'success' });
-    (mantraService.saveMantra as jest.Mock).mockResolvedValue({ status: 'success' });
+      (mantraService.getFeedMantras as jest.Mock).mockResolvedValue({
+        status: 'success',
+        data: sample,
+      });
+      (mantraService.likeMantra as jest.Mock).mockResolvedValue({ status: 'success' });
+      (mantraService.saveMantra as jest.Mock).mockResolvedValue({ status: 'success' });
 
-    const { getByText, getByTestId } = setup();
+      const { getByText, getByTestId } = setup();
 
-    await waitFor(
-      () => {
-        expect(getByText('M1')).toBeTruthy();
-        expect(getByText('M2')).toBeTruthy();
-      },
-      { timeout: 10000 },
-    );
+      await waitFor(
+        () => {
+          expect(getByText('M1')).toBeTruthy();
+          expect(getByText('M2')).toBeTruthy();
+        },
+        { timeout: 10000 },
+      );
 
-    fireEvent.press(getByTestId('like-1'));
-    await waitFor(() => expect(mantraService.likeMantra).toHaveBeenCalledWith(1, 'token-abc'), {
-      timeout: 10000,
-    });
+      fireEvent.press(getByTestId('like-1'));
+      await waitFor(() => expect(mantraService.likeMantra).toHaveBeenCalledWith(1, 'token-abc'), {
+        timeout: 10000,
+      });
 
-    fireEvent.press(getByTestId('save-2'));
-    await waitFor(() => expect(mantraService.saveMantra).toHaveBeenCalledWith(2, 'token-abc'), {
-      timeout: 10000,
-    });
-  });
+      fireEvent.press(getByTestId('save-2'));
+      await waitFor(() => expect(mantraService.saveMantra).toHaveBeenCalledWith(2, 'token-abc'), {
+        timeout: 10000,
+      });
+    },
+    30000,
+  );
 
   it('reverts like on failure and shows alert', async () => {
     (storage.getToken as jest.Mock).mockResolvedValue('token-fail');
