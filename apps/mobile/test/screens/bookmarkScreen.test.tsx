@@ -217,4 +217,65 @@ describe('BookmarkScreen', () => {
       expect(Array.isArray(mantraText.props.style)).toBe(true);
     });
   });
+
+  it('calls goBack when back button is pressed (with mantras)', async () => {
+    (collectionService.getCollectionById as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { mantras: mockMantras },
+    });
+
+    const { getByTestId } = renderScreen();
+
+    await waitFor(() => {
+      expect(getByTestId('back-button')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('back-button'));
+
+    expect(mockGoBack).toHaveBeenCalled();
+  });
+
+  it('calls goBack when back button is pressed (loading state)', async () => {
+    // Keep the promise pending to keep loading state
+    (collectionService.getCollectionById as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+    const { getByText, getByTestId } = renderScreen();
+
+    // Wait for the loading state to render
+    await waitFor(() => {
+      expect(getByText('Loading mantras...')).toBeTruthy();
+    });
+
+    // The back button should be present in the loading state
+    const backButton = getByTestId('back-button-empty');
+    fireEvent.press(backButton);
+
+    expect(mockGoBack).toHaveBeenCalled();
+  });
+
+  it('refreshes mantras when pull-to-refresh is triggered', async () => {
+    (collectionService.getCollectionById as jest.Mock)
+      .mockResolvedValueOnce({
+        status: 'success',
+        data: { mantras: mockMantras },
+      })
+      .mockResolvedValueOnce({
+        status: 'success',
+        data: { mantras: [...mockMantras, { mantra_id: 3, title: 'New Mantra', key_takeaway: 'New', created_at: '2024-01-03', is_active: true }] },
+      });
+
+    const { getByTestId } = renderScreen();
+
+    await waitFor(() => {
+      expect(getByTestId('mantra-list')).toBeTruthy();
+    });
+
+    // Trigger refresh
+    const flatList = getByTestId('mantra-list');
+    fireEvent(flatList, 'refresh');
+
+    await waitFor(() => {
+      expect(collectionService.getCollectionById).toHaveBeenCalledTimes(2);
+    });
+  });
 });

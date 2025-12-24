@@ -74,6 +74,7 @@ export default function BookmarkScreen({ navigation, route }: any) {
       <View style={[styles.container, { backgroundColor: colors.primary }]}>
         <View style={[styles.header, { backgroundColor: colors.primary }]}>
           <TouchableOpacity
+            testID="back-button-empty"
             onPress={() => navigation.goBack()}
             style={styles.backButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -96,6 +97,7 @@ export default function BookmarkScreen({ navigation, route }: any) {
     <View style={[styles.container, { backgroundColor: colors.primary }]}>
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <TouchableOpacity
+          testID="back-button"
           onPress={() => navigation.goBack()}
           style={styles.backButton}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -117,6 +119,7 @@ export default function BookmarkScreen({ navigation, route }: any) {
         </View>
       ) : (
         <FlatList
+          testID="mantra-list"
           data={mantras}
           keyExtractor={(item) => item.mantra_id.toString()}
           renderItem={renderItem}

@@ -32,7 +32,6 @@ export default function HomeScreen({ navigation }: any) {
   const [collectionToast, setCollectionToast] = useState('');
   const [collections, setCollections] = useState<Collection[]>([]);
   const [currentMantraId, setCurrentMantraId] = useState<number | null>(null);
-  const [collectionsLoading, setCollectionsLoading] = useState(false);
 
   const { colors } = useTheme();
   const { setSavedMantras } = useSavedMantras();
