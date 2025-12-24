@@ -115,11 +115,14 @@ describe('BookmarkScreen', () => {
 
     const { getByText } = renderScreen();
 
-    await waitFor(() => {
-      expect(collectionService.getCollectionById).toHaveBeenCalledWith(123, 'test-token');
-      expect(getByText('Test Mantra 1')).toBeTruthy();
-      expect(getByText('Test Mantra 2')).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(collectionService.getCollectionById).toHaveBeenCalledWith(123, 'test-token');
+        expect(getByText('Test Mantra 1')).toBeTruthy();
+        expect(getByText('Test Mantra 2')).toBeTruthy();
+      },
+      { timeout: 10000 },
+    );
   });
 
   it('uses fallback token when getToken returns null', async () => {

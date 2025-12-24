@@ -2,6 +2,7 @@ import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import HomeScreen from '../../screens/homeScreen';
 import { mantraService } from '../../services/mantra.service';
+import { collectionService } from '../../services/collection.service';
 import { storage } from '../../utils/storage';
 import { SavedProvider } from '../../context/SavedContext';
 
@@ -34,6 +35,12 @@ jest.mock('../../services/mantra.service', () => ({
   },
 }));
 
+jest.mock('../../services/collection.service', () => ({
+  collectionService: {
+    getUserCollections: jest.fn(),
+  },
+}));
+
 jest.mock('../../utils/storage', () => ({
   storage: {
     getToken: jest.fn(),
@@ -59,6 +66,10 @@ describe('HomeScreen - Full Coverage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (collectionService.getUserCollections as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: { collections: [] },
+    });
   });
 
   it('shows loading then empty state and refresh works', async () => {
