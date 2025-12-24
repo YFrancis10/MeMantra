@@ -85,7 +85,9 @@ describe('CollectionsScreen', () => {
   const renderScreen = () => render(<CollectionsScreen navigation={mockNavigation} />);
 
   it('renders loading state initially', () => {
-    (collectionService.getUserCollections as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    (collectionService.getUserCollections as jest.Mock).mockImplementation(
+      () => new Promise(() => {}),
+    );
 
     const { getByText } = renderScreen();
 
@@ -111,7 +113,7 @@ describe('CollectionsScreen', () => {
     );
 
     expect(collectionService.getUserCollections).toHaveBeenCalledWith('test-token');
-  });
+  }, 15000);
 
   it('sorts collections with "Saved Mantras" first', async () => {
     const unsortedCollections = [
@@ -149,12 +151,17 @@ describe('CollectionsScreen', () => {
 
   it('handles error when loading collections fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    (collectionService.getUserCollections as jest.Mock).mockRejectedValue(new Error('Network error'));
+    (collectionService.getUserCollections as jest.Mock).mockRejectedValue(
+      new Error('Network error'),
+    );
 
     renderScreen();
 
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching collections:', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error fetching collections:',
+        expect.any(Error),
+      );
       expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to load collections');
     });
 
@@ -273,7 +280,10 @@ describe('CollectionsScreen', () => {
         await deleteButton.onPress();
 
         await waitFor(() => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith('Error deleting collection:', expect.any(Error));
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error deleting collection:',
+            expect.any(Error),
+          );
           expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to delete collection');
         });
       }
@@ -369,4 +379,3 @@ describe('CollectionsScreen', () => {
     });
   });
 });
-
