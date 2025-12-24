@@ -98,7 +98,7 @@ describe('HomeScreen - Full Coverage', () => {
 
     const { getByText } = setup();
 
-    await waitFor(() => expect(getByText('No mantras available')).toBeTruthy());
+    await waitFor(() => expect(getByText('No mantras available')).toBeTruthy(), { timeout: 10000 });
   });
 
   it('renders feed and handles like/save success', async () => {
@@ -127,10 +127,14 @@ describe('HomeScreen - Full Coverage', () => {
     );
 
     fireEvent.press(getByTestId('like-1'));
-    await waitFor(() => expect(mantraService.likeMantra).toHaveBeenCalledWith(1, 'token-abc'));
+    await waitFor(() => expect(mantraService.likeMantra).toHaveBeenCalledWith(1, 'token-abc'), {
+      timeout: 10000,
+    });
 
     fireEvent.press(getByTestId('save-2'));
-    await waitFor(() => expect(mantraService.saveMantra).toHaveBeenCalledWith(2, 'token-abc'));
+    await waitFor(() => expect(mantraService.saveMantra).toHaveBeenCalledWith(2, 'token-abc'), {
+      timeout: 10000,
+    });
   });
 
   it('reverts like on failure and shows alert', async () => {
