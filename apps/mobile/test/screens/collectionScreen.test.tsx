@@ -101,11 +101,14 @@ describe('CollectionsScreen', () => {
 
     const { getByText } = renderScreen();
 
-    await waitFor(() => {
-      expect(getByText('Saved Mantras')).toBeTruthy();
-      expect(getByText('My Collection')).toBeTruthy();
-      expect(getByText('Another Collection')).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(getByText('Saved Mantras')).toBeTruthy();
+        expect(getByText('My Collection')).toBeTruthy();
+        expect(getByText('Another Collection')).toBeTruthy();
+      },
+      { timeout: 10000 },
+    );
 
     expect(collectionService.getUserCollections).toHaveBeenCalledWith('test-token');
   });

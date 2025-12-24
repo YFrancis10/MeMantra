@@ -79,21 +79,23 @@ export default function CollectionsScreen({ navigation }: any) {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              const token = (await storage.getToken()) || 'mock-token';
-              await collectionService.deleteCollection(collection.collection_id, token);
+          onPress: () => {
+            void (async () => {
+              try {
+                const token = (await storage.getToken()) || 'mock-token';
+                await collectionService.deleteCollection(collection.collection_id, token);
 
-              // Remove from local state
-              setCollections((prev) =>
-                prev.filter((c) => c.collection_id !== collection.collection_id),
-              );
+                // Remove from local state
+                setCollections((prev) =>
+                  prev.filter((c) => c.collection_id !== collection.collection_id),
+                );
 
-              Alert.alert('Success', 'Collection deleted successfully');
-            } catch (err) {
-              console.error('Error deleting collection:', err);
-              Alert.alert('Error', 'Failed to delete collection');
-            }
+                Alert.alert('Success', 'Collection deleted successfully');
+              } catch (err) {
+                console.error('Error deleting collection:', err);
+                Alert.alert('Error', 'Failed to delete collection');
+              }
+            })();
           },
         },
       ],
