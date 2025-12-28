@@ -19,8 +19,16 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     }
 
     // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    const trimmedEmail = email.trim();
+    const atIndex = trimmedEmail.indexOf('@');
+    const lastDotIndex = trimmedEmail.lastIndexOf('.');
+
+    if (
+      atIndex <= 0 ||
+      lastDotIndex <= atIndex + 1 ||
+      lastDotIndex >= trimmedEmail.length - 1 ||
+      trimmedEmail.includes(' ')
+    ) {
       Alert.alert('Error', 'Please enter a valid email address');
       return;
     }

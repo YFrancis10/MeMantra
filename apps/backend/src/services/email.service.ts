@@ -1,8 +1,10 @@
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 // Configure Gmail SMTP transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -18,9 +20,12 @@ transporter.verify((error) => {
   }
 });
 
-// Generate a random 6-digit code
+// Generate a random 6-digit code 
 export const generate6DigitCode = (): string => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const randomBytes = crypto.randomBytes(4);
+  const randomNumber = randomBytes.readUInt32BE(0);
+  const code = (randomNumber % 900000) + 100000;
+  return code.toString();
 };
 
 // Send a 6-digit verification code to the user's email
