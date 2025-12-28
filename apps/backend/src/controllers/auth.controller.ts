@@ -9,6 +9,22 @@ import { OAuth2Client } from 'google-auth-library';
 import { emailService } from '../services/email.service';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Helper function to verify reset code and return user
+async function verifyResetCodeAndGetUser(email: string, code: string) {
+  // Find user
+  const user = await UserModel.findByEmail(email.toLowerCase().trim());
+  if (!user) {
+    return null;
+  }
+
+  // Verify code
+  const validToken = await PasswordResetTokenModel.findValidToken(user.user_id, code.trim());
+  if (!validToken) {
+    return null;
+  }
+
+  return user;
+}
 
 export const AuthController = {
   async register(req: Request, res: Response) {
@@ -372,19 +388,9 @@ async updateEmail(req: Request, res: Response) {
         });
       }
 
-      // Find user
-      const user = await UserModel.findByEmail(email.toLowerCase().trim());
+      const user = await verifyResetCodeAndGetUser(email, code);
+
       if (!user) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Invalid verification code',
-        });
-      }
-
-      // Verify code
-      const validToken = await PasswordResetTokenModel.findValidToken(user.user_id, code.trim());
-
-      if (!validToken) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid or expired verification code',
@@ -426,19 +432,9 @@ async updateEmail(req: Request, res: Response) {
         });
       }
 
-      // Find user
-      const user = await UserModel.findByEmail(email.toLowerCase().trim());
+      const user = await verifyResetCodeAndGetUser(email, code);
+
       if (!user) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Invalid request',
-        });
-      }
-
-      // Verify code one more time
-      const validToken = await PasswordResetTokenModel.findValidToken(user.user_id, code.trim());
-
-      if (!validToken) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid or expired verification code',
