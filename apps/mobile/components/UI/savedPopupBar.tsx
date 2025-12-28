@@ -4,11 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
 type SavedPopupBarProps = {
-  visible: boolean;
-  message?: string;
-  onHide: () => void;
-  durationMs?: number;
-  onPressCollections: () => void;
+  readonly visible: boolean;
+  readonly message?: string;
+  readonly onHide: () => void;
+  readonly durationMs?: number;
+  readonly onPressCollections: () => void;
 };
 
 export default function SavedPopupBar({

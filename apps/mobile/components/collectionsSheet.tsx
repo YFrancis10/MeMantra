@@ -23,14 +23,14 @@ export type Collection = {
 };
 
 type Props = {
-  visible: boolean;
-  collections: Collection[];
-  onClose: () => void;
-  onSelectCollection: (collectionId: number) => void | Promise<void>;
-  onCreateCollection: (name: string) => Promise<number>;
-  onRefresh?: () => void;
-  title?: string;
-  loading?: boolean;
+  readonly visible: boolean;
+  readonly collections: Collection[];
+  readonly onClose: () => void;
+  readonly onSelectCollection: (collectionId: number) => void | Promise<void>;
+  readonly onCreateCollection: (name: string) => Promise<number>;
+  readonly onRefresh?: () => void;
+  readonly title?: string;
+  readonly loading?: boolean;
 };
 
 const { height: H } = Dimensions.get('window');
@@ -235,20 +235,24 @@ export default function CollectionsSheet({
             </Pressable>
           )}
 
-          {loading ? (
+          {loading && (
             <View className="py-8 items-center">
               <ActivityIndicator size="small" color="#111827" />
               <Text className="mt-2 text-[13px]" style={{ color: '#6B7280' }}>
                 Loading collections...
               </Text>
             </View>
-          ) : collections.length === 0 ? (
+          )}
+
+          {!loading && collections.length === 0 && (
             <View className="py-8 items-center">
               <Text className="text-[13px]" style={{ color: '#6B7280' }}>
                 No collections yet. Create one above!
               </Text>
             </View>
-          ) : (
+          )}
+
+          {!loading && collections.length > 0 && (
             <FlatList
               data={collections}
               keyExtractor={(c) => String(c.collection_id)}

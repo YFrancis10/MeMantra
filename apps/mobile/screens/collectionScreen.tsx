@@ -38,8 +38,8 @@ export default function CollectionsScreen({ navigation }: any) {
       const response = await collectionService.getUserCollections(token);
 
       if (response.status === 'success' && response.data) {
-        // Sort collections: "Saved Mantras" first, then others
-        const sorted = response.data.collections.sort((a, b) => {
+        // Sort collections: "Saved Mantras" first, then others (using immutable sort)
+        const sorted = [...response.data.collections].sort((a, b) => {
           if (a.name === 'Saved Mantras') return -1;
           if (b.name === 'Saved Mantras') return 1;
           return 0;
@@ -67,6 +67,23 @@ export default function CollectionsScreen({ navigation }: any) {
     });
   };
 
+  const performDeleteCollection = async (collection: Collection) => {
+    try {
+      const token = (await storage.getToken()) || 'mock-token';
+      await collectionService.deleteCollection(collection.collection_id, token);
+
+      // Remove from local state
+      setCollections((prev) =>
+        prev.filter((c) => c.collection_id !== collection.collection_id),
+      );
+
+      Alert.alert('Success', 'Collection deleted successfully');
+    } catch (err) {
+      console.error('Error deleting collection:', err);
+      Alert.alert('Error', 'Failed to delete collection');
+    }
+  };
+
   const handleDeleteCollection = (collection: Collection) => {
     Alert.alert(
       'Delete Collection',
@@ -80,22 +97,7 @@ export default function CollectionsScreen({ navigation }: any) {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            void (async () => {
-              try {
-                const token = (await storage.getToken()) || 'mock-token';
-                await collectionService.deleteCollection(collection.collection_id, token);
-
-                // Remove from local state
-                setCollections((prev) =>
-                  prev.filter((c) => c.collection_id !== collection.collection_id),
-                );
-
-                Alert.alert('Success', 'Collection deleted successfully');
-              } catch (err) {
-                console.error('Error deleting collection:', err);
-                Alert.alert('Error', 'Failed to delete collection');
-              }
-            })();
+            void performDeleteCollection(collection);
           },
         },
       ],
