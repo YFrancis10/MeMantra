@@ -13,6 +13,7 @@ import BottomTabNavigator from '../components/bottomTabNavigator';
 import UpdateEmailScreen from '../screens/UpdateEmailScreen';
 import UpdatePasswordScreen from '../screens/UpdatePasswordScreen';
 import FocusScreen from '../screens/focusScreen';
+import ConversationScreen from '../screens/conversationScreen';
 
 const Stack = createStackNavigator();
 
@@ -80,6 +81,21 @@ export default function MainNavigator() {
               transitionSpec: {
                 open: { animation: 'timing', config: { duration: 450 } },
                 close: { animation: 'timing', config: { duration: 350 } },
+              },
+            }}
+          />
+
+          <Stack.Screen
+            name="Conversation"
+            component={ConversationScreen}
+            options={{
+              headerShown: true,
+              headerStyle: {
+                backgroundColor: '#9AA793',
+              },
+              headerTintColor: '#ffffff',
+              headerTitleStyle: {
+                fontFamily: 'LibreBaskerville-Regular',
               },
             }}
           />
