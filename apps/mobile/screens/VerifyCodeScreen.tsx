@@ -151,7 +151,9 @@ export default function VerifyCodeScreen({ route, navigation }: any) {
               {code.map((digit, index) => (
                 <TextInput
                   key={index}
-                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  ref={(ref) => {
+                    inputRefs.current[index] = ref;
+                  }}
                   className="bg-[#ffffff] rounded-[12px] text-[24px] font-bold text-center border border-[#e0e0e0]"
                   style={{
                     width: 50,
