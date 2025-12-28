@@ -139,6 +139,13 @@ export default function LoginScreen({ navigation }: any) {
               <AppText className="text-[#ffffff] text-[18px] font-semibold">Login</AppText>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              className="items-center mt-[16px]"
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
+              <AppText className="text-[#ffffff] text-[14px] underline">Forgot Password?</AppText>
+            </TouchableOpacity>
+
             <TouchableOpacity className="items-center mt-[20px]" onPress={handleSignUp}>
               <AppText className="text-[#fff] text-[14px]">
                 New to us?
