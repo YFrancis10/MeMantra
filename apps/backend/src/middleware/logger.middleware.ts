@@ -78,14 +78,14 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 export const errorLogger = (err: any, req: Request, _res: Response, next: NextFunction) => {
   console.error('\n==================== API ERROR ====================');
   console.error(`[${new Date().toISOString()}]`);
-  console.error(`Method: ${req.method.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
-  console.error(`Path: ${req.path.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
-  console.error(`Error Name: ${(err?.name || 'Error').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
+  console.error(`Method: ${sanitizeForLog(req.method)}`);
+  console.error(`Path: ${sanitizeForLog(req.path)}`);
+  console.error(`Error Name: ${sanitizeForLog(err?.name || 'Error')}`);
   console.error(
-    `Error Message: ${(err?.message || 'Unknown error').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`,
+    `Error Message: ${sanitizeForLog(err?.message || 'Unknown error')}`,
   );
   console.error(
-    `Stack Trace: ${(err?.stack ? err.stack : 'None').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`,
+    `Stack Trace: ${sanitizeForLog(err?.stack ? err.stack : 'None')}`,
   );
   console.error('====================================================\n');
 
