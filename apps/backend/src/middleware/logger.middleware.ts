@@ -29,10 +29,6 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     const sanitizedBody = Array.isArray(req.body)
       ? [...req.body]
       : ({ ...req.body } as Record<string, unknown>);
-    if (sanitizedBody && !Array.isArray(sanitizedBody) && typeof sanitizedBody === 'object') {
-      if ('password' in sanitizedBody) sanitizedBody.password = '[REDACTED]';
-      if ('confirmPassword' in sanitizedBody) sanitizedBody.confirmPassword = '[REDACTED]';
-    }
     try {
       console.log('Body:', sanitizeForLog(JSON.stringify(sanitizedBody)));
     } catch {
