@@ -12,6 +12,7 @@ export interface Database {
   CollectionMantra: CollectionMantraTable;
   Reminder: ReminderTable;
   RecommendationLog: RecommendationLogTable;
+  PasswordResetToken: PasswordResetTokenTable;
 }
 
 //table interfaces
@@ -102,6 +103,14 @@ export interface RecommendationLogTable {
   reason: string | null;
 }
 
+export interface PasswordResetTokenTable {
+  token_id: Generated<number>;
+  user_id: number;
+  code: string;
+  expires_at: string;
+  created_at: string | null;
+}
+
 //types for type safe operations (typescript ting)
 export type User = Selectable<UserTable>;
 export type NewUser = Insertable<UserTable>;
@@ -138,3 +147,7 @@ export type ReminderUpdate = Updateable<ReminderTable>;
 export type RecommendationLog = Selectable<RecommendationLogTable>;
 export type NewRecommendationLog = Insertable<RecommendationLogTable>;
 export type RecommendationLogUpdate = Updateable<RecommendationLogTable>;
+
+export type PasswordResetToken = Selectable<PasswordResetTokenTable>;
+export type NewPasswordResetToken = Insertable<PasswordResetTokenTable>;
+export type PasswordResetTokenUpdate = Updateable<PasswordResetTokenTable>;

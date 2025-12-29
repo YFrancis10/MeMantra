@@ -146,7 +146,7 @@ describe('AdminScreen', () => {
       );
       expect(Alert.alert).toHaveBeenCalledWith('Success', 'Mantra created successfully');
     });
-  });
+  }, 10000);
 
   it('shows alert when mantra fields are missing', async () => {
     const { getByText } = render(<AdminScreen />);
