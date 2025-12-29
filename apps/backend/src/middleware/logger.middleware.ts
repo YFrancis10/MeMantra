@@ -1,28 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 
+const sanitizeForLog = (value: unknown): string =>
+  String(value).replace(/[\r\n\u2028\u2029]+/g, ' ');
+
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
 
   //log requests
   console.log('\n==================== API REQUEST ====================');
   console.log(`[${new Date().toISOString()}]`);
-  console.log(`Method: ${req.method.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
-  console.log(`Path: ${req.path.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
-  const fullUrl = `Full URL: ${req.protocol.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}://${(
-    req.get('host') || ''
-  ).replaceAll(
-    /[\r\n\u2028\u2029]+/g,
-    ' ',
-  )}${req.originalUrl.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`;
+  console.log(`Method: ${sanitizeForLog(req.method)}`);
+  console.log(`Path: ${sanitizeForLog(req.path)}`);
+  const fullUrl = `Full URL: ${sanitizeForLog(req.protocol)}://${sanitizeForLog(
+    req.get('host') || '',
+  )}${sanitizeForLog(req.originalUrl)}`;
   console.log(fullUrl);
-  console.log(
-    `IP: ${(req.ip || req.socket.remoteAddress || '').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`,
-  );
+  console.log(`IP: ${sanitizeForLog(req.ip || req.socket.remoteAddress || '')}`);
 
   //log headers
   console.log('Headers:', {
-    'content-type': (req.get('content-type') || '').replaceAll(/[\r\n\u2028\u2029]+/g, ' '),
-    'user-agent': (req.get('user-agent') || '').replaceAll(/[\r\n\u2028\u2029]+/g, ' '),
+    'content-type': sanitizeForLog(req.get('content-type') || ''),
+    'user-agent': sanitizeForLog(req.get('user-agent') || ''),
     authorization: req.get('authorization') ? 'Bearer [REDACTED]' : 'None',
   });
 
@@ -36,7 +34,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       if ('confirmPassword' in sanitizedBody) sanitizedBody.confirmPassword = '[REDACTED]';
     }
     try {
-      console.log('Body:', JSON.stringify(sanitizedBody).replaceAll(/[\r\n\u2028\u2029]+/g, ' '));
+      console.log('Body:', sanitizeForLog(JSON.stringify(sanitizedBody)));
     } catch {
       console.log('Body: [Unserializable Body]');
     }
@@ -44,7 +42,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
   if (req.query && Object.keys(req.query).length > 0) {
     try {
-      console.log('Query:', JSON.stringify(req.query).replaceAll(/[\r\n\u2028\u2029]+/g, ' '));
+      console.log('Query:', sanitizeForLog(JSON.stringify(req.query)));
     } catch {
       console.log('Query: [Unserializable Query]');
     }
@@ -63,13 +61,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     try {
       const responseData = typeof data === 'string' ? JSON.parse(data) : data;
       const responsePreview = JSON.stringify(responseData).substring(0, 500);
-      console.log(
-        'Response Preview:',
-        (responsePreview + (responsePreview.length >= 500 ? '...' : '')).replaceAll(
-          /[\r\n\u2028\u2029]+/g,
-          ' ',
-        ),
-      );
+      const previewWithEllipsis = responsePreview + (responsePreview.length >= 500 ? '...' : '');
+      console.log('Response Preview:', sanitizeForLog(previewWithEllipsis));
     } catch {
       console.log('Response: [Non-JSON or Binary Data]');
     }
