@@ -101,4 +101,26 @@ export const MessageModel = {
       .limit(1)
       .executeTakeFirst();
   },
+
+  // Get all replies to a specific message
+  async getReplies(messageId: number): Promise<Message[]> {
+    return await db
+      .selectFrom('Message')
+      .where('reply_to_message_id', '=', messageId)
+      .selectAll()
+      .orderBy('created_at', 'asc')
+      .execute();
+  },
+
+  // Check if a message exists in a specific conversation
+  async existsInConversation(messageId: number, conversationId: number): Promise<boolean> {
+    const message = await db
+      .selectFrom('Message')
+      .where('message_id', '=', messageId)
+      .where('conversation_id', '=', conversationId)
+      .select('message_id')
+      .executeTakeFirst();
+
+    return !!message;
+  },
 };

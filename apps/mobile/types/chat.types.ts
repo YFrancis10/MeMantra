@@ -5,6 +5,7 @@ export interface Message {
   content: string;
   created_at: string;
   read: boolean;
+  reply_to_message_id?: number | null;
 }
 
 export interface Conversation {
@@ -20,6 +21,7 @@ export interface Conversation {
 export interface CreateMessagePayload {
   conversation_id: number;
   content: string;
+  reply_to_message_id?: number;
 }
 
 export interface CreateConversationPayload {

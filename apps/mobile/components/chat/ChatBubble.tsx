@@ -3,14 +3,21 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import AppText from '../UI/textWrapper';
 import { useNavigation } from '@react-navigation/native';
+import { Message } from '../../types/chat.types';
 
 interface ChatBubbleProps {
-  content: string;
+  message: Message;
   isOwnMessage: boolean;
-  timestamp: string;
+  onLongPress?: (message: Message) => void;
+  replyToMessage?: Message | null;
 }
 
-const ChatBubble: React.FC<ChatBubbleProps> = ({ content, isOwnMessage, timestamp }) => {
+const ChatBubble: React.FC<ChatBubbleProps> = ({
+  message,
+  isOwnMessage,
+  onLongPress,
+  replyToMessage,
+}) => {
   const { colors } = useTheme();
   const navigation = useNavigation<any>();
 
@@ -20,6 +27,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ content, isOwnMessage, timestam
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   };
+
+  const { content, created_at } = message;
 
   // share a mantra
   let parsed: any = null;
@@ -65,7 +74,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ content, isOwnMessage, timestam
           <AppText style={[styles.mantraCTA, { color: colors.primaryDark }]}>Tap to view</AppText>
 
           <AppText style={[styles.timestamp, { color: `${colors.primaryDark}99` }]}>
-            {formatTime(timestamp)}
+            {formatTime(created_at)}
           </AppText>
         </TouchableOpacity>
       </View>
@@ -80,7 +89,9 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ content, isOwnMessage, timestam
         isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer,
       ]}
     >
-      <View
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onLongPress={() => onLongPress && onLongPress(message)}
         style={[
           styles.bubble,
           {
@@ -88,6 +99,31 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ content, isOwnMessage, timestam
           },
         ]}
       >
+        {/* Show reply context if this is a reply */}
+        {replyToMessage && (
+          <View
+            style={[
+              styles.replyContainer,
+              {
+                backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
+                borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
+              },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.replyText,
+                {
+                  color: isOwnMessage ? colors.primaryDark : '#ffffff',
+                },
+              ]}
+              numberOfLines={2}
+            >
+              {replyToMessage.content}
+            </AppText>
+          </View>
+        )}
+
         <AppText
           style={[
             styles.messageText,
@@ -106,9 +142,9 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ content, isOwnMessage, timestam
             },
           ]}
         >
-          {formatTime(timestamp)}
+          {formatTime(created_at)}
         </AppText>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -163,6 +199,18 @@ const styles = StyleSheet.create({
   timestamp: {
     fontSize: 11,
     marginTop: 4,
+  },
+  replyContainer: {
+    borderLeftWidth: 3,
+    paddingLeft: 8,
+    paddingVertical: 6,
+    marginBottom: 8,
+    borderRadius: 4,
+  },
+  replyText: {
+    fontSize: 13,
+    opacity: 0.8,
+    fontStyle: 'italic',
   },
 });
 

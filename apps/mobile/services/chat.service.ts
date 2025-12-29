@@ -130,6 +130,7 @@ const mockChatService = {
         content: payload.content,
         created_at: new Date().toISOString(),
         read: false,
+        reply_to_message_id: payload.reply_to_message_id || null,
       };
 
       // Add to mock storage

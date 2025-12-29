@@ -156,7 +156,7 @@ export const ChatController = {
   async sendMessage(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-      const { conversation_id, content } = req.body;
+      const { conversation_id, content, reply_to_message_id } = req.body;
 
       if (!userId) {
         return res.status(401).json({
@@ -182,6 +182,25 @@ export const ChatController = {
         });
       }
 
+      // If replying to a message, verify it exists and belongs to the same conversation
+      if (reply_to_message_id) {
+        const replyToMessage = await MessageModel.findById(reply_to_message_id);
+        
+        if (!replyToMessage) {
+          return res.status(404).json({
+            status: 'error',
+            message: 'Message to reply to not found',
+          });
+        }
+
+        if (replyToMessage.conversation_id !== conversation_id) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Cannot reply to a message from a different conversation',
+          });
+        }
+      }
+
       // Create the message
       const message = await MessageModel.create({
         conversation_id,
@@ -189,6 +208,7 @@ export const ChatController = {
         content,
         created_at: new Date().toISOString(),
         read: false,
+        reply_to_message_id: reply_to_message_id || null,
       });
 
       // Update conversation timestamp

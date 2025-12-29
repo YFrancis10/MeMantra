@@ -14,6 +14,7 @@ export default function ConversationScreen({ route, navigation }: any) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<number>(1); // Will be fetched from storage
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -62,11 +63,13 @@ export default function ConversationScreen({ route, navigation }: any) {
         {
           conversation_id: conversation.conversation_id,
           content,
+          reply_to_message_id: replyingTo?.message_id,
         },
         token || 'mock-token',
       );
 
       setMessages((prev) => [...prev, newMessage]);
+      setReplyingTo(null); // Clear reply state after sending
 
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
@@ -74,6 +77,22 @@ export default function ConversationScreen({ route, navigation }: any) {
     } catch (err) {
       console.error('Error sending message:', err);
     }
+  };
+
+  const handleLongPress = (message: Message) => {
+    // Don't allow replying to own messages (optional - you can remove this restriction)
+    if (message.sender_id !== currentUserId) {
+      setReplyingTo(message);
+    }
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+  };
+
+  const getReplyToMessage = (messageId: number | null | undefined): Message | null => {
+    if (!messageId) return null;
+    return messages.find((m) => m.message_id === messageId) || null;
   };
 
   return (
@@ -100,9 +119,10 @@ export default function ConversationScreen({ route, navigation }: any) {
           contentContainerStyle={styles.messagesList}
           renderItem={({ item }) => (
             <ChatBubble
-              content={item.content}
+              message={item}
               isOwnMessage={item.sender_id === currentUserId}
-              timestamp={item.created_at}
+              onLongPress={handleLongPress}
+              replyToMessage={getReplyToMessage(item.reply_to_message_id)}
             />
           )}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
@@ -110,7 +130,7 @@ export default function ConversationScreen({ route, navigation }: any) {
         />
       )}
 
-      <ChatInput onSend={handleSend} />
+      <ChatInput onSend={handleSend} replyingTo={replyingTo} onCancelReply={handleCancelReply} />
     </KeyboardAvoidingView>
   );
 }

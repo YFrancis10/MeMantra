@@ -19,6 +19,7 @@ export const sendMessageSchema = z.object({
   body: z.object({
     conversation_id: z.number().int().positive('Invalid conversation ID'),
     content: z.string().min(1, 'Message content is required').max(1000, 'Message is too long'),
+    reply_to_message_id: z.number().int().positive('Invalid message ID').optional(),
   }),
 });
 

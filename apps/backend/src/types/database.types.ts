@@ -119,6 +119,7 @@ export interface MessageTable {
   content: string;
   created_at: string;
   read: boolean;
+  reply_to_message_id: number | null;
 }
 
 //types for type safe operations (typescript ting)

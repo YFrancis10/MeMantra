@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS "Message" (
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     read BOOLEAN NOT NULL DEFAULT FALSE,
+    reply_to_message_id INTEGER REFERENCES "Message"(message_id) ON DELETE SET NULL,
     
     CONSTRAINT message_not_empty CHECK (LENGTH(TRIM(content)) > 0)
 );
@@ -34,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_message_conversation ON "Message"(conversation_id
 CREATE INDEX IF NOT EXISTS idx_message_sender ON "Message"(sender_id);
 CREATE INDEX IF NOT EXISTS idx_message_created ON "Message"(created_at);
 CREATE INDEX IF NOT EXISTS idx_message_read ON "Message"(read) WHERE read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_message_reply ON "Message"(reply_to_message_id);
 
 -- Function to update conversation timestamp on new message
 CREATE OR REPLACE FUNCTION update_conversation_timestamp()
@@ -58,3 +60,4 @@ COMMENT ON TABLE "Message" IS 'Stores messages within conversations';
 COMMENT ON COLUMN "Conversation".user1_id IS 'First participant in the conversation';
 COMMENT ON COLUMN "Conversation".user2_id IS 'Second participant in the conversation';
 COMMENT ON COLUMN "Message".read IS 'Whether the message has been read by the recipient';
+COMMENT ON COLUMN "Message".reply_to_message_id IS 'ID of the message being replied to, if this is a reply';
