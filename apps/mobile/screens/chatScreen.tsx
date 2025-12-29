@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import AppText from '../components/UI/textWrapper';
 import ChatList from '../components/chat/ChatList';
@@ -14,7 +14,13 @@ export default function ChatScreen({ navigation }: any) {
 
   useEffect(() => {
     loadConversations();
-  }, []);
+
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadConversations();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadConversations = async () => {
     try {
@@ -35,6 +41,10 @@ export default function ChatScreen({ navigation }: any) {
     });
   };
 
+  const handleNewConversation = () => {
+    navigation.navigate('NewConversation');
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.primary }]}>
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
@@ -46,6 +56,14 @@ export default function ChatScreen({ navigation }: any) {
         loading={loading}
         onConversationPress={handleConversationPress}
       />
+
+      {/* Floating Action Button for New Conversation */}
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: colors.secondary }]}
+        onPress={handleNewConversation}
+      >
+        <AppText style={[styles.fabText, { color: colors.primaryDark }]}>+</AppText>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -62,6 +80,25 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 30,
+    fontWeight: 'bold',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  fabText: {
+    fontSize: 24,
     fontWeight: 'bold',
   },
 });

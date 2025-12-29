@@ -6,12 +6,7 @@ import {
   CreateConversationPayload,
 } from '../types/chat.types';
 
-/**
- * CONFIGURATION
- * --------------
- * Set USE_MOCK_DATA = false when backend is ready.
- */
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false; //Since backend is ready, I put it to false
 
 /**
  * MOCK DATA

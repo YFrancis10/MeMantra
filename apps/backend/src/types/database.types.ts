@@ -12,6 +12,8 @@ export interface Database {
   CollectionMantra: CollectionMantraTable;
   Reminder: ReminderTable;
   RecommendationLog: RecommendationLogTable;
+  Conversation: ConversationTable;
+  Message: MessageTable;
 }
 
 //table interfaces
@@ -102,6 +104,23 @@ export interface RecommendationLogTable {
   reason: string | null;
 }
 
+export interface ConversationTable {
+  conversation_id: Generated<number>;
+  user1_id: number;
+  user2_id: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MessageTable {
+  message_id: Generated<number>;
+  conversation_id: number;
+  sender_id: number;
+  content: string;
+  created_at: string;
+  read: boolean;
+}
+
 //types for type safe operations (typescript ting)
 export type User = Selectable<UserTable>;
 export type NewUser = Insertable<UserTable>;
@@ -138,3 +157,11 @@ export type ReminderUpdate = Updateable<ReminderTable>;
 export type RecommendationLog = Selectable<RecommendationLogTable>;
 export type NewRecommendationLog = Insertable<RecommendationLogTable>;
 export type RecommendationLogUpdate = Updateable<RecommendationLogTable>;
+
+export type Conversation = Selectable<ConversationTable>;
+export type NewConversation = Insertable<ConversationTable>;
+export type ConversationUpdate = Updateable<ConversationTable>;
+
+export type Message = Selectable<MessageTable>;
+export type NewMessage = Insertable<MessageTable>;
+export type MessageUpdate = Updateable<MessageTable>;

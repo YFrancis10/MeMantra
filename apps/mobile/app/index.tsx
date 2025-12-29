@@ -14,6 +14,7 @@ import UpdateEmailScreen from '../screens/UpdateEmailScreen';
 import UpdatePasswordScreen from '../screens/UpdatePasswordScreen';
 import FocusScreen from '../screens/focusScreen';
 import ConversationScreen from '../screens/conversationScreen';
+import NewConversationScreen from '../screens/NewConversationScreen';
 
 const Stack = createStackNavigator();
 
@@ -82,6 +83,14 @@ export default function MainNavigator() {
                 open: { animation: 'timing', config: { duration: 450 } },
                 close: { animation: 'timing', config: { duration: 350 } },
               },
+            }}
+          />
+
+          <Stack.Screen
+            name="NewConversation"
+            component={NewConversationScreen}
+            options={{
+              headerShown: false,
             }}
           />
 
