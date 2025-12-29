@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 
 const sanitizeLogValue = (value: unknown): unknown => {
   if (typeof value === 'string') {
-    return value.replace(/\n|\r/g, '');
+    // Remove line breaks and other ASCII control characters, then clearly mark as user input
+    const cleaned = value.replace(/[\x00-\x1F\x7F]/g, '');
+    return `[USER] ${cleaned}`;
   }
 
   if (Array.isArray(value)) {
