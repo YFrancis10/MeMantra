@@ -17,11 +17,8 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   console.log(`[${new Date().toISOString()}]`);
   console.log(`Method: ${sanitizeLogValue(req.method)}`);
   console.log(`Path: ${sanitizeLogValue(req.path)}`);
-  console.log(
-    `Full URL: ${sanitizeLogValue(req.protocol)}://${sanitizeLogValue(req.get('host') || '')}${sanitizeLogValue(
-      req.originalUrl,
-    )}`,
-  );
+  const fullUrl = `Full URL: ${req.protocol}://${req.get('host') || ''}${req.originalUrl}`;
+  console.log(sanitizeLogValue(fullUrl));
   console.log(`IP: ${sanitizeLogValue(req.ip || req.socket.remoteAddress || '')}`);
 
   //log headers
@@ -58,7 +55,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       const responsePreview = JSON.stringify(responseData).substring(0, 500);
       console.log(
         'Response Preview:',
-        responsePreview + (responsePreview.length >= 500 ? '...' : ''),
+        sanitizeLogValue(responsePreview + (responsePreview.length >= 500 ? '...' : '')),
       );
     } catch {
       console.log('Response: [Non-JSON or Binary Data]');
