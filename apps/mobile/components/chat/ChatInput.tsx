@@ -38,27 +38,44 @@ const ChatInput: React.FC<ChatInputProps> = ({
       ]}
     >
       {/* Reply Preview */}
-      {replyingTo && (
-        <View
-          style={[
-            styles.replyPreview,
-            {
-              backgroundColor: colors.primaryDark,
-              borderTopColor: `${colors.primaryDark}33`,
-            },
-          ]}
-        >
-          <View style={styles.replyContent}>
-            <AppText style={[styles.replyLabel, { color: colors.secondary }]}>Replying to:</AppText>
-            <AppText style={[styles.replyText, { color: '#ffffff' }]} numberOfLines={1}>
-              {replyingTo.content}
-            </AppText>
-          </View>
-          <TouchableOpacity onPress={onCancelReply} style={styles.cancelButton}>
-            <Ionicons name="close-circle" size={24} color={colors.secondary} />
-          </TouchableOpacity>
-        </View>
-      )}
+      {replyingTo &&
+        (() => {
+          let parsed: any = null;
+          try {
+            parsed = JSON.parse(replyingTo.content);
+          } catch {
+            parsed = null;
+          }
+
+          const isMantraShare = parsed?.type === 'mantra_share';
+          const displayText = isMantraShare
+            ? `Mantra: ${parsed.text ?? 'Shared mantra'}`
+            : replyingTo.content;
+
+          return (
+            <View
+              style={[
+                styles.replyPreview,
+                {
+                  backgroundColor: colors.primaryDark,
+                  borderTopColor: `${colors.primaryDark}33`,
+                },
+              ]}
+            >
+              <View style={styles.replyContent}>
+                <AppText style={[styles.replyLabel, { color: colors.secondary }]}>
+                  Replying to:
+                </AppText>
+                <AppText style={[styles.replyText, { color: '#ffffff' }]} numberOfLines={1}>
+                  {displayText}
+                </AppText>
+              </View>
+              <TouchableOpacity onPress={onCancelReply} style={styles.cancelButton}>
+                <Ionicons name="close-circle" size={24} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
+          );
+        })()}
 
       {/* Input Container */}
       <View

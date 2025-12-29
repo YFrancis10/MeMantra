@@ -80,10 +80,8 @@ export default function ConversationScreen({ route, navigation }: any) {
   };
 
   const handleLongPress = (message: Message) => {
-    // Don't allow replying to own messages (optional - you can remove this restriction)
-    if (message.sender_id !== currentUserId) {
-      setReplyingTo(message);
-    }
+    // Allow replying to any message including shared mantras
+    setReplyingTo(message);
   };
 
   const handleCancelReply = () => {

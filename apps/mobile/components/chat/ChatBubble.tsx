@@ -54,6 +54,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               params: { returnToMantraId: parsed.mantra_id },
             })
           }
+          onLongPress={() => onLongPress && onLongPress(message)}
           activeOpacity={0.85}
           style={[
             styles.bubble,
@@ -63,6 +64,46 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             },
           ]}
         >
+          {/* Show reply context if this is a reply */}
+          {replyToMessage &&
+            (() => {
+              let replyParsed: any = null;
+              try {
+                replyParsed = JSON.parse(replyToMessage.content);
+              } catch {
+                replyParsed = null;
+              }
+
+              const isReplyToMantra = replyParsed?.type === 'mantra_share';
+              const replyDisplayText = isReplyToMantra
+                ? `🧘 ${replyParsed.text ?? 'Shared mantra'}`
+                : replyToMessage.content;
+
+              return (
+                <View
+                  style={[
+                    styles.replyContainer,
+                    {
+                      backgroundColor: `${colors.primaryDark}20`,
+                      borderLeftColor: colors.primaryDark,
+                    },
+                  ]}
+                >
+                  <AppText
+                    style={[
+                      styles.replyText,
+                      {
+                        color: colors.primaryDark,
+                      },
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {replyDisplayText}
+                  </AppText>
+                </View>
+              );
+            })()}
+
           <AppText style={[styles.mantraLabel, { color: colors.primaryDark }]}>
             {isOwnMessage ? 'You shared a mantra' : 'Shared a mantra'}
           </AppText>
@@ -100,29 +141,44 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
         ]}
       >
         {/* Show reply context if this is a reply */}
-        {replyToMessage && (
-          <View
-            style={[
-              styles.replyContainer,
-              {
-                backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
-                borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
-              },
-            ]}
-          >
-            <AppText
-              style={[
-                styles.replyText,
-                {
-                  color: isOwnMessage ? colors.primaryDark : '#ffffff',
-                },
-              ]}
-              numberOfLines={2}
-            >
-              {replyToMessage.content}
-            </AppText>
-          </View>
-        )}
+        {replyToMessage &&
+          (() => {
+            let replyParsed: any = null;
+            try {
+              replyParsed = JSON.parse(replyToMessage.content);
+            } catch {
+              replyParsed = null;
+            }
+
+            const isReplyToMantra = replyParsed?.type === 'mantra_share';
+            const replyDisplayText = isReplyToMantra
+              ? ` ${replyParsed.text ?? 'Shared mantra'}`
+              : replyToMessage.content;
+
+            return (
+              <View
+                style={[
+                  styles.replyContainer,
+                  {
+                    backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
+                    borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
+                  },
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.replyText,
+                    {
+                      color: isOwnMessage ? colors.primaryDark : '#ffffff',
+                    },
+                  ]}
+                  numberOfLines={2}
+                >
+                  {replyDisplayText}
+                </AppText>
+              </View>
+            );
+          })()}
 
         <AppText
           style={[
