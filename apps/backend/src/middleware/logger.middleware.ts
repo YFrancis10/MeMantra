@@ -1,43 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
 
-const sanitizeLogValue = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  const str = String(value);
-  // Remove CR/LF and other ASCII control characters to prevent log injection/forgery.
-  return str.replace(/[\r\n\x00-\x1F\x7F]+/g, ' ');
-};
-
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
 
   //log requests
   console.log('\n==================== API REQUEST ====================');
   console.log(`[${new Date().toISOString()}]`);
-  console.log(`Method: ${sanitizeLogValue(req.method)}`);
-  console.log(`Path: ${sanitizeLogValue(req.path)}`);
-  const fullUrl = `Full URL: ${req.protocol}://${req.get('host') || ''}${req.originalUrl}`;
-  console.log(sanitizeLogValue(fullUrl));
-  console.log(`IP: ${sanitizeLogValue(req.ip || req.socket.remoteAddress || '')}`);
+  console.log(`Method: ${req.method.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
+  console.log(`Path: ${req.path.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
+  const fullUrl = `Full URL: ${req.protocol.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}://${(
+    req.get('host') || ''
+  ).replaceAll(
+    /[\r\n\u2028\u2029]+/g,
+    ' ',
+  )}${req.originalUrl.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`;
+  console.log(fullUrl);
+  console.log(
+    `IP: ${(req.ip || req.socket.remoteAddress || '').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`,
+  );
 
   //log headers
   console.log('Headers:', {
-    'content-type': sanitizeLogValue(req.get('content-type') || ''),
-    'user-agent': sanitizeLogValue(req.get('user-agent') || ''),
+    'content-type': (req.get('content-type') || '').replaceAll(/[\r\n\u2028\u2029]+/g, ' '),
+    'user-agent': (req.get('user-agent') || '').replaceAll(/[\r\n\u2028\u2029]+/g, ' '),
     authorization: req.get('authorization') ? 'Bearer [REDACTED]' : 'None',
   });
 
   //log body
   if (req.body && Object.keys(req.body).length > 0) {
-    const sanitizedBody = JSON.parse(JSON.stringify(req.body)) as Record<string, unknown>;
-    if (sanitizedBody.password) sanitizedBody.password = '[REDACTED]';
-    if (sanitizedBody.confirmPassword) sanitizedBody.confirmPassword = '[REDACTED]';
-    console.log('Body:', sanitizeLogValue(JSON.stringify(sanitizedBody)));
+    const sanitizedBody = Array.isArray(req.body)
+      ? [...req.body]
+      : ({ ...req.body } as Record<string, unknown>);
+    if (sanitizedBody && !Array.isArray(sanitizedBody) && typeof sanitizedBody === 'object') {
+      if ('password' in sanitizedBody) sanitizedBody.password = '[REDACTED]';
+      if ('confirmPassword' in sanitizedBody) sanitizedBody.confirmPassword = '[REDACTED]';
+    }
+    try {
+      console.log('Body:', JSON.stringify(sanitizedBody).replaceAll(/[\r\n\u2028\u2029]+/g, ' '));
+    } catch {
+      console.log('Body: [Unserializable Body]');
+    }
   }
 
   if (req.query && Object.keys(req.query).length > 0) {
-    console.log('Query:', sanitizeLogValue(JSON.stringify(req.query)));
+    try {
+      console.log('Query:', JSON.stringify(req.query).replaceAll(/[\r\n\u2028\u2029]+/g, ' '));
+    } catch {
+      console.log('Query: [Unserializable Query]');
+    }
   }
 
   //response
@@ -55,7 +65,10 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       const responsePreview = JSON.stringify(responseData).substring(0, 500);
       console.log(
         'Response Preview:',
-        sanitizeLogValue(responsePreview + (responsePreview.length >= 500 ? '...' : '')),
+        (responsePreview + (responsePreview.length >= 500 ? '...' : '')).replaceAll(
+          /[\r\n\u2028\u2029]+/g,
+          ' ',
+        ),
       );
     } catch {
       console.log('Response: [Non-JSON or Binary Data]');
@@ -72,11 +85,15 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 export const errorLogger = (err: any, req: Request, _res: Response, next: NextFunction) => {
   console.error('\n==================== API ERROR ====================');
   console.error(`[${new Date().toISOString()}]`);
-  console.error(`Method: ${sanitizeLogValue(req.method)}`);
-  console.error(`Path: ${sanitizeLogValue(req.path)}`);
-  console.error(`Error Name: ${sanitizeLogValue(err?.name || 'Error')}`);
-  console.error(`Error Message: ${sanitizeLogValue(err?.message || 'Unknown error')}`);
-  console.error(`Stack Trace: ${sanitizeLogValue(err?.stack ? err.stack : 'None')}`);
+  console.error(`Method: ${req.method.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
+  console.error(`Path: ${req.path.replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
+  console.error(`Error Name: ${(err?.name || 'Error').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`);
+  console.error(
+    `Error Message: ${(err?.message || 'Unknown error').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`,
+  );
+  console.error(
+    `Stack Trace: ${(err?.stack ? err.stack : 'None').replaceAll(/[\r\n\u2028\u2029]+/g, ' ')}`,
+  );
   console.error('====================================================\n');
 
   next(err);
