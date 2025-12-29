@@ -15,6 +15,7 @@ import UpdatePasswordScreen from '../screens/UpdatePasswordScreen';
 import FocusScreen from '../screens/focusScreen';
 import ConversationScreen from '../screens/conversationScreen';
 import NewConversationScreen from '../screens/NewConversationScreen';
+import ShareMantraScreen from '../screens/ShareMantraScreen';
 
 const Stack = createStackNavigator();
 
@@ -65,11 +66,10 @@ export default function MainNavigator() {
           <Stack.Screen name="MainApp" component={BottomTabNavigator} />
           <Stack.Screen name="Login" component={Login} options={{ headerTitle: 'Login' }} />
           <Stack.Screen name="Signup" component={Signup} options={{ headerTitle: 'Signup' }} />
-
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="UpdateEmail" component={UpdateEmailScreen} />
           <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
-
+          <Stack.Screen name="ShareMantra" component={ShareMantraScreen} />
           <Stack.Screen
             name="Focus"
             component={FocusScreen}

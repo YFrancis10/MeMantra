@@ -28,6 +28,23 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, loading, onConversat
     return date.toLocaleDateString();
   };
 
+  const getPreviewText = (lastMessage: string | null | undefined) => {
+    if (!lastMessage) return 'No messages yet';
+
+    try {
+      const parsed = JSON.parse(lastMessage);
+
+      // Shared mantra preview
+      if (parsed?.type === 'mantra_share') {
+        return 'Shared a mantra';
+      }
+    } catch {
+      // normal text otherwise
+    }
+
+    return lastMessage;
+  };
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -114,7 +131,7 @@ const ChatList: React.FC<ChatListProps> = ({ conversations, loading, onConversat
                 }}
                 numberOfLines={1}
               >
-                {item.last_message || 'No messages yet'}
+                {getPreviewText(item.last_message)}
               </AppText>
               {item.unread_count > 0 && (
                 <View
