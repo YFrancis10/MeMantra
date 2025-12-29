@@ -21,3 +21,20 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   multiSet: jest.fn(() => Promise.resolve()),
   multiRemove: jest.fn(() => Promise.resolve()),
 }));
+
+// Mock TurboModuleRegistry to avoid DevMenu errors in tests
+jest.mock(
+  'react-native/Libraries/TurboModule/TurboModuleRegistry',
+  () => ({
+    getEnforcing: jest.fn(() => ({
+      addListener: jest.fn(),
+      removeListeners: jest.fn(),
+    })),
+  }),
+  { virtual: true },
+);
+
+// Mock React Native Alert
+global.Alert = {
+  alert: jest.fn(),
+};

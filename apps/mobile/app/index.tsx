@@ -13,6 +13,7 @@ import BottomTabNavigator from '../components/bottomTabNavigator';
 import UpdateEmailScreen from '../screens/UpdateEmailScreen';
 import UpdatePasswordScreen from '../screens/UpdatePasswordScreen';
 import FocusScreen from '../screens/focusScreen';
+import BookmarkScreen from '../screens/bookmarkScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import VerifyCodeScreen from '../screens/VerifyCodeScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
@@ -81,11 +82,9 @@ export default function MainNavigator() {
             component={ResetPasswordScreen}
             options={{ headerTitle: 'Reset Password' }}
           />
-
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="UpdateEmail" component={UpdateEmailScreen} />
           <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
-
           <Stack.Screen
             name="Focus"
             component={FocusScreen}
@@ -98,6 +97,21 @@ export default function MainNavigator() {
               transitionSpec: {
                 open: { animation: 'timing', config: { duration: 450 } },
                 close: { animation: 'timing', config: { duration: 350 } },
+              },
+            }}
+          />
+          <Stack.Screen
+            name="CollectionDetail"
+            component={BookmarkScreen}
+            options={{
+              cardStyleInterpolator: ({ current }) => ({
+                cardStyle: {
+                  opacity: current.progress,
+                },
+              }),
+              transitionSpec: {
+                open: { animation: 'timing', config: { duration: 300 } },
+                close: { animation: 'timing', config: { duration: 300 } },
               },
             }}
           />
