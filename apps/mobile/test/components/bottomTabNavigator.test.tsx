@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import BottomTabNavigator from '../../components/bottomTabNavigator';
+
+jest.spyOn(Alert, 'alert');
 
 /* Mock navigation */
 jest.mock('@react-navigation/native', () => ({
