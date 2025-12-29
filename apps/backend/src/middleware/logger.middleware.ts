@@ -1,25 +1,33 @@
 import { Request, Response, NextFunction } from 'express';
 
+const sanitizeLogValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  const str = String(value);
+  // Remove CR/LF and other ASCII control characters to prevent log injection/forgery.
+  return str.replace(/[\r\n\x00-\x1F\x7F]+/g, ' ');
+};
+
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
 
   //log requests
   console.log('\n==================== API REQUEST ====================');
   console.log(`[${new Date().toISOString()}]`);
-  console.log(`Method: ${req.method.replace(/[\r\n]+/g, ' ')}`);
-  console.log(`Path: ${req.path.replace(/[\r\n]+/g, ' ')}`);
+  console.log(`Method: ${sanitizeLogValue(req.method)}`);
+  console.log(`Path: ${sanitizeLogValue(req.path)}`);
   console.log(
-    `Full URL: ${req.protocol.replace(/[\r\n]+/g, ' ')}://${(req.get('host') || '').replace(
-      /[\r\n]+/g,
-      ' ',
-    )}${req.originalUrl.replace(/[\r\n]+/g, ' ')}`,
+    `Full URL: ${sanitizeLogValue(req.protocol)}://${sanitizeLogValue(req.get('host') || '')}${sanitizeLogValue(
+      req.originalUrl,
+    )}`,
   );
-  console.log(`IP: ${(req.ip || req.socket.remoteAddress || '').replace(/[\r\n]+/g, ' ')}`);
+  console.log(`IP: ${sanitizeLogValue(req.ip || req.socket.remoteAddress || '')}`);
 
   //log headers
   console.log('Headers:', {
-    'content-type': (req.get('content-type') || '').replace(/[\r\n]+/g, ' '),
-    'user-agent': (req.get('user-agent') || '').replace(/[\r\n]+/g, ' '),
+    'content-type': sanitizeLogValue(req.get('content-type') || ''),
+    'user-agent': sanitizeLogValue(req.get('user-agent') || ''),
     authorization: req.get('authorization') ? 'Bearer [REDACTED]' : 'None',
   });
 
@@ -28,11 +36,11 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     const sanitizedBody = JSON.parse(JSON.stringify(req.body)) as Record<string, unknown>;
     if (sanitizedBody.password) sanitizedBody.password = '[REDACTED]';
     if (sanitizedBody.confirmPassword) sanitizedBody.confirmPassword = '[REDACTED]';
-    console.log('Body:', JSON.stringify(sanitizedBody).replace(/[\r\n]+/g, ' '));
+    console.log('Body:', sanitizeLogValue(JSON.stringify(sanitizedBody)));
   }
 
   if (req.query && Object.keys(req.query).length > 0) {
-    console.log('Query:', JSON.stringify(req.query).replace(/[\r\n]+/g, ' '));
+    console.log('Query:', sanitizeLogValue(JSON.stringify(req.query)));
   }
 
   //response
@@ -67,11 +75,11 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 export const errorLogger = (err: any, req: Request, _res: Response, next: NextFunction) => {
   console.error('\n==================== API ERROR ====================');
   console.error(`[${new Date().toISOString()}]`);
-  console.error(`Method: ${req.method.replace(/[\r\n]+/g, ' ')}`);
-  console.error(`Path: ${req.path.replace(/[\r\n]+/g, ' ')}`);
-  console.error(`Error Name: ${(err?.name || 'Error').replace(/[\r\n]+/g, ' ')}`);
-  console.error(`Error Message: ${(err?.message || 'Unknown error').replace(/[\r\n]+/g, ' ')}`);
-  console.error(`Stack Trace: ${(err?.stack ? err.stack : 'None').replace(/[\r\n]+/g, ' ')}`);
+  console.error(`Method: ${sanitizeLogValue(req.method)}`);
+  console.error(`Path: ${sanitizeLogValue(req.path)}`);
+  console.error(`Error Name: ${sanitizeLogValue(err?.name || 'Error')}`);
+  console.error(`Error Message: ${sanitizeLogValue(err?.message || 'Unknown error')}`);
+  console.error(`Stack Trace: ${sanitizeLogValue(err?.stack ? err.stack : 'None')}`);
   console.error('====================================================\n');
 
   next(err);
