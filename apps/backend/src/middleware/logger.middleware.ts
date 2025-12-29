@@ -1,43 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 
-const sanitizeLogValue = (value: unknown): unknown => {
-  if (typeof value === 'string') {
-    return value.replace(/\n|\r/g, '');
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) => sanitizeLogValue(item));
-  }
-
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
-        key,
-        sanitizeLogValue(item),
-      ]),
-    );
-  }
-
-  return value;
-};
-
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
 
   //log requests
   console.log('\n==================== API REQUEST ====================');
   console.log(`[${new Date().toISOString()}]`);
-  console.log(`Method: ${sanitizeLogValue(req.method)}`);
-  console.log(`Path: ${sanitizeLogValue(req.path)}`);
-  console.log(
-    `Full URL: ${sanitizeLogValue(req.protocol)}://${sanitizeLogValue(req.get('host'))}${sanitizeLogValue(req.originalUrl)}`,
-  );
-  console.log(`IP: ${sanitizeLogValue(req.ip || req.socket.remoteAddress)}`);
+  console.log(`Method: ${req.method}`);
+  console.log(`Path: ${req.path}`);
+  console.log(`Full URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+  console.log(`IP: ${req.ip || req.socket.remoteAddress}`);
 
   //log headers
   console.log('Headers:', {
-    'content-type': sanitizeLogValue(req.get('content-type')),
-    'user-agent': sanitizeLogValue(req.get('user-agent')),
+    'content-type': req.get('content-type'),
+    'user-agent': req.get('user-agent'),
     authorization: req.get('authorization') ? 'Bearer [REDACTED]' : 'None',
   });
 
@@ -46,11 +23,11 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     const sanitizedBody = { ...req.body };
     if (sanitizedBody.password) sanitizedBody.password = '[REDACTED]';
     if (sanitizedBody.confirmPassword) sanitizedBody.confirmPassword = '[REDACTED]';
-    console.log('Body:', sanitizeLogValue(sanitizedBody));
+    console.log('Body:', sanitizedBody);
   }
 
   if (req.query && Object.keys(req.query).length > 0) {
-    console.log('Query:', sanitizeLogValue(req.query));
+    console.log('Query:', req.query);
   }
 
   //response
@@ -68,7 +45,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       const responsePreview = JSON.stringify(responseData).substring(0, 500);
       console.log(
         'Response Preview:',
-        sanitizeLogValue(responsePreview) + (responsePreview.length >= 500 ? '...' : ''),
+        responsePreview + (responsePreview.length >= 500 ? '...' : ''),
       );
     } catch {
       console.log('Response: [Non-JSON or Binary Data]');
@@ -85,11 +62,11 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 export const errorLogger = (err: any, req: Request, _res: Response, next: NextFunction) => {
   console.error('\n==================== API ERROR ====================');
   console.error(`[${new Date().toISOString()}]`);
-  console.error(`Method: ${sanitizeLogValue(req.method)}`);
-  console.error(`Path: ${sanitizeLogValue(req.path)}`);
-  console.error(`Error Name: ${sanitizeLogValue(err.name)}`);
-  console.error(`Error Message: ${sanitizeLogValue(err.message)}`);
-  console.error(`Stack Trace:`, sanitizeLogValue(err.stack));
+  console.error(`Method: ${req.method}`);
+  console.error(`Path: ${req.path}`);
+  console.error(`Error Name: ${err.name}`);
+  console.error(`Error Message: ${err.message}`);
+  console.error(`Stack Trace:`, err.stack);
   console.error('====================================================\n');
 
   next(err);
