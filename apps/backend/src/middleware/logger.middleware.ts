@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 const sanitizeForLog = (value: unknown): string =>
-  String(value).replace(/[\r\n\u2028\u2029]+/g, ' ');
+  String(value).replaceAll(/[\r\n\u2028\u2029]+/g, ' ');
 
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
