@@ -16,6 +16,7 @@ import FocusScreen from '../screens/focusScreen';
 import ConversationScreen from '../screens/conversationScreen';
 import NewConversationScreen from '../screens/NewConversationScreen';
 import ShareMantraScreen from '../screens/ShareMantraScreen';
+import BookmarkScreen from '../screens/bookmarkScreen';
 
 const Stack = createStackNavigator();
 
@@ -105,6 +106,21 @@ export default function MainNavigator() {
               headerTintColor: '#ffffff',
               headerTitleStyle: {
                 fontFamily: 'LibreBaskerville-Regular',
+              },
+            }}
+          />
+          <Stack.Screen
+            name="CollectionDetail"
+            component={BookmarkScreen}
+            options={{
+              cardStyleInterpolator: ({ current }) => ({
+                cardStyle: {
+                  opacity: current.progress,
+                },
+              }),
+              transitionSpec: {
+                open: { animation: 'timing', config: { duration: 300 } },
+                close: { animation: 'timing', config: { duration: 300 } },
               },
             }}
           />

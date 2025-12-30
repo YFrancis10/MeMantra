@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/homeScreen';
 import AdminScreen from '../screens/adminScreen';
-import bookmarkScreen from '../screens/bookmarkScreen';
+import CollectionsScreen from '../screens/collectionScreen';
 import ChatScreen from '../screens/chatScreen';
 import { storage } from '../utils/storage';
 import { isAdminEmail } from '../utils/admin';
@@ -71,7 +71,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen
         name="Library"
-        component={bookmarkScreen}
+        component={CollectionsScreen}
         options={{
           tabBarIcon: LibraryTabIcon,
         }}
