@@ -6,6 +6,13 @@ export interface Message {
   created_at: string;
   read: boolean;
   reply_to_message_id?: number | null;
+  reactions?: MessageReaction[];
+}
+
+export interface MessageReaction {
+  emoji: string;
+  count: number;
+  users: number[];
 }
 
 export interface Conversation {
@@ -26,4 +33,8 @@ export interface CreateMessagePayload {
 
 export interface CreateConversationPayload {
   participant_id: number;
+}
+
+export interface AddReactionPayload {
+  emoji: string;
 }

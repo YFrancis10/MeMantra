@@ -14,6 +14,7 @@ export interface Database {
   RecommendationLog: RecommendationLogTable;
   Conversation: ConversationTable;
   Message: MessageTable;
+  MessageReaction: MessageReactionTable;
 }
 
 //table interfaces
@@ -122,6 +123,14 @@ export interface MessageTable {
   reply_to_message_id: number | null;
 }
 
+export interface MessageReactionTable {
+  reaction_id: Generated<number>;
+  message_id: number;
+  user_id: number;
+  emoji: string;
+  created_at: Generated<string>;
+}
+
 //types for type safe operations (typescript ting)
 export type User = Selectable<UserTable>;
 export type NewUser = Insertable<UserTable>;
@@ -166,3 +175,7 @@ export type ConversationUpdate = Updateable<ConversationTable>;
 export type Message = Selectable<MessageTable>;
 export type NewMessage = Insertable<MessageTable>;
 export type MessageUpdate = Updateable<MessageTable>;
+
+export type MessageReaction = Selectable<MessageReactionTable>;
+export type NewMessageReaction = Insertable<MessageReactionTable>;
+export type MessageReactionUpdate = Updateable<MessageReactionTable>;

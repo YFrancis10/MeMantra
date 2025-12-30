@@ -1,25 +1,32 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import AppText from '../UI/textWrapper';
 import { useNavigation } from '@react-navigation/native';
-import { Message } from '../../types/chat.types';
+import { Message, MessageReaction } from '../../types/chat.types';
 
 interface ChatBubbleProps {
   message: Message;
   isOwnMessage: boolean;
   onLongPress?: (message: Message) => void;
   replyToMessage?: Message | null;
+  onReaction?: (messageId: number, emoji: string) => void;
+  currentUserId?: number;
 }
+
+const EMOJI_OPTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({
   message,
   isOwnMessage,
   onLongPress,
   replyToMessage,
+  onReaction,
+  currentUserId,
 }) => {
   const { colors } = useTheme();
   const navigation = useNavigation<any>();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -29,6 +36,94 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   };
 
   const { content, created_at } = message;
+
+  const handleEmojiSelect = (emoji: string) => {
+    if (onReaction) {
+      onReaction(message.message_id, emoji);
+    }
+    setShowEmojiPicker(false);
+  };
+
+  const handleBubblePress = () => {
+    setShowEmojiPicker(true);
+  };
+
+  const renderReactions = () => {
+    if (!message.reactions || message.reactions.length === 0) {
+      return null;
+    }
+
+    return (
+      <View
+        style={[
+          styles.reactionsContainer,
+          isOwnMessage ? styles.reactionsRight : styles.reactionsLeft,
+        ]}
+      >
+        {message.reactions.map((reaction: MessageReaction, index: number) => {
+          const userReacted = currentUserId ? reaction.users.includes(currentUserId) : false;
+          return (
+            <TouchableOpacity
+              key={`${reaction.emoji}-${index}`}
+              style={[
+                styles.reactionBubble,
+                {
+                  backgroundColor: userReacted ? colors.secondary : `${colors.primaryDark}20`,
+                  borderColor: userReacted ? colors.primaryDark : 'transparent',
+                  borderWidth: userReacted ? 1.5 : 0,
+                },
+              ]}
+              onPress={() => handleEmojiSelect(reaction.emoji)}
+              activeOpacity={0.7}
+            >
+              <AppText style={styles.reactionEmoji}>{reaction.emoji}</AppText>
+              {reaction.count > 1 && (
+                <AppText style={[styles.reactionCount, { color: colors.primaryDark }]}>
+                  {reaction.count}
+                </AppText>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+        <TouchableOpacity
+          style={[styles.reactionBubble, { backgroundColor: `${colors.primaryDark}15` }]}
+          onPress={handleBubblePress}
+          activeOpacity={0.7}
+        >
+          <AppText style={styles.addReactionText}>+</AppText>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderEmojiPicker = () => (
+    <Modal
+      visible={showEmojiPicker}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowEmojiPicker(false)}
+    >
+      <Pressable style={styles.modalOverlay} onPress={() => setShowEmojiPicker(false)}>
+        <View style={[styles.emojiPickerContainer, { backgroundColor: colors.primary }]}>
+          <AppText style={[styles.emojiPickerTitle, { color: colors.primaryDark }]}>
+            React with an emoji
+          </AppText>
+          <View style={styles.emojiGrid}>
+            {EMOJI_OPTIONS.map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                style={styles.emojiOption}
+                onPress={() => handleEmojiSelect(emoji)}
+                activeOpacity={0.7}
+              >
+                <AppText style={styles.emojiOptionText}>{emoji}</AppText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Pressable>
+    </Modal>
+  );
 
   // share a mantra
   let parsed: any = null;
@@ -41,6 +136,98 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   //
   if (parsed?.type === 'mantra_share') {
     return (
+      <>
+        {renderEmojiPicker()}
+        <View
+          style={[
+            styles.container,
+            isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer,
+          ]}
+        >
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('MainApp', {
+                screen: 'Home',
+                params: { returnToMantraId: parsed.mantra_id },
+              })
+            }
+            onLongPress={() => {
+              onLongPress && onLongPress(message);
+              handleBubblePress();
+            }}
+            activeOpacity={0.85}
+            style={[
+              styles.bubble,
+              styles.mantraBubble,
+              {
+                backgroundColor: colors.secondary,
+              },
+            ]}
+          >
+            {/* Show reply context if this is a reply */}
+            {replyToMessage &&
+              (() => {
+                let replyParsed: any = null;
+                try {
+                  replyParsed = JSON.parse(replyToMessage.content);
+                } catch {
+                  replyParsed = null;
+                }
+
+                const isReplyToMantra = replyParsed?.type === 'mantra_share';
+                const replyDisplayText = isReplyToMantra
+                  ? `🧘 ${replyParsed.text ?? 'Shared mantra'}`
+                  : replyToMessage.content;
+
+                return (
+                  <View
+                    style={[
+                      styles.replyContainer,
+                      {
+                        backgroundColor: `${colors.primaryDark}20`,
+                        borderLeftColor: colors.primaryDark,
+                      },
+                    ]}
+                  >
+                    <AppText
+                      style={[
+                        styles.replyText,
+                        {
+                          color: colors.primaryDark,
+                        },
+                      ]}
+                      numberOfLines={2}
+                    >
+                      {replyDisplayText}
+                    </AppText>
+                  </View>
+                );
+              })()}
+
+            <AppText style={[styles.mantraLabel, { color: colors.primaryDark }]}>
+              {isOwnMessage ? 'You shared a mantra' : 'Shared a mantra'}
+            </AppText>
+
+            <AppText style={[styles.mantraTitle, { color: colors.primaryDark }]}>
+              “{parsed.text ?? 'Open mantra'}”
+            </AppText>
+
+            <AppText style={[styles.mantraCTA, { color: colors.primaryDark }]}>Tap to view</AppText>
+
+            <AppText style={[styles.timestamp, { color: `${colors.primaryDark}99` }]}>
+              {formatTime(created_at)}
+            </AppText>
+          </TouchableOpacity>
+          {renderReactions()}
+        </View>
+      </>
+    );
+  }
+
+  //text message
+  return (
+    <>
+      {renderEmojiPicker()}
       <View
         style={[
           styles.container,
@@ -48,19 +235,13 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
         ]}
       >
         <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('MainApp', {
-              screen: 'Home',
-              params: { returnToMantraId: parsed.mantra_id },
-            })
-          }
+          activeOpacity={0.9}
           onLongPress={() => onLongPress && onLongPress(message)}
-          activeOpacity={0.85}
+          onPress={handleBubblePress}
           style={[
             styles.bubble,
-            styles.mantraBubble,
             {
-              backgroundColor: colors.secondary,
+              backgroundColor: isOwnMessage ? colors.secondary : colors.primaryDark,
             },
           ]}
         >
@@ -76,7 +257,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
 
               const isReplyToMantra = replyParsed?.type === 'mantra_share';
               const replyDisplayText = isReplyToMantra
-                ? `🧘 ${replyParsed.text ?? 'Shared mantra'}`
+                ? ` ${replyParsed.text ?? 'Shared mantra'}`
                 : replyToMessage.content;
 
               return (
@@ -84,8 +265,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                   style={[
                     styles.replyContainer,
                     {
-                      backgroundColor: `${colors.primaryDark}20`,
-                      borderLeftColor: colors.primaryDark,
+                      backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
+                      borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
                     },
                   ]}
                 >
@@ -93,7 +274,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                     style={[
                       styles.replyText,
                       {
-                        color: colors.primaryDark,
+                        color: isOwnMessage ? colors.primaryDark : '#ffffff',
                       },
                     ]}
                     numberOfLines={2}
@@ -104,104 +285,30 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               );
             })()}
 
-          <AppText style={[styles.mantraLabel, { color: colors.primaryDark }]}>
-            {isOwnMessage ? 'You shared a mantra' : 'Shared a mantra'}
+          <AppText
+            style={[
+              styles.messageText,
+              {
+                color: isOwnMessage ? colors.primaryDark : '#ffffff',
+              },
+            ]}
+          >
+            {content}
           </AppText>
-
-          <AppText style={[styles.mantraTitle, { color: colors.primaryDark }]}>
-            “{parsed.text ?? 'Open mantra'}”
-          </AppText>
-
-          <AppText style={[styles.mantraCTA, { color: colors.primaryDark }]}>Tap to view</AppText>
-
-          <AppText style={[styles.timestamp, { color: `${colors.primaryDark}99` }]}>
+          <AppText
+            style={[
+              styles.timestamp,
+              {
+                color: isOwnMessage ? `${colors.primaryDark}99` : '#ffffff99',
+              },
+            ]}
+          >
             {formatTime(created_at)}
           </AppText>
         </TouchableOpacity>
+        {renderReactions()}
       </View>
-    );
-  }
-
-  //text message
-  return (
-    <View
-      style={[
-        styles.container,
-        isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer,
-      ]}
-    >
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onLongPress={() => onLongPress && onLongPress(message)}
-        style={[
-          styles.bubble,
-          {
-            backgroundColor: isOwnMessage ? colors.secondary : colors.primaryDark,
-          },
-        ]}
-      >
-        {/* Show reply context if this is a reply */}
-        {replyToMessage &&
-          (() => {
-            let replyParsed: any = null;
-            try {
-              replyParsed = JSON.parse(replyToMessage.content);
-            } catch {
-              replyParsed = null;
-            }
-
-            const isReplyToMantra = replyParsed?.type === 'mantra_share';
-            const replyDisplayText = isReplyToMantra
-              ? ` ${replyParsed.text ?? 'Shared mantra'}`
-              : replyToMessage.content;
-
-            return (
-              <View
-                style={[
-                  styles.replyContainer,
-                  {
-                    backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
-                    borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
-                  },
-                ]}
-              >
-                <AppText
-                  style={[
-                    styles.replyText,
-                    {
-                      color: isOwnMessage ? colors.primaryDark : '#ffffff',
-                    },
-                  ]}
-                  numberOfLines={2}
-                >
-                  {replyDisplayText}
-                </AppText>
-              </View>
-            );
-          })()}
-
-        <AppText
-          style={[
-            styles.messageText,
-            {
-              color: isOwnMessage ? colors.primaryDark : '#ffffff',
-            },
-          ]}
-        >
-          {content}
-        </AppText>
-        <AppText
-          style={[
-            styles.timestamp,
-            {
-              color: isOwnMessage ? `${colors.primaryDark}99` : '#ffffff99',
-            },
-          ]}
-        >
-          {formatTime(created_at)}
-        </AppText>
-      </TouchableOpacity>
-    </View>
+    </>
   );
 };
 
@@ -267,6 +374,77 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.8,
     fontStyle: 'italic',
+  },
+  reactionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+    gap: 6,
+  },
+  reactionsLeft: {
+    justifyContent: 'flex-start',
+  },
+  reactionsRight: {
+    justifyContent: 'flex-end',
+  },
+  reactionBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  reactionEmoji: {
+    fontSize: 14,
+  },
+  reactionCount: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  addReactionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    opacity: 0.6,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emojiPickerContainer: {
+    borderRadius: 16,
+    padding: 20,
+    width: '80%',
+    maxWidth: 300,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  emojiPickerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  emojiGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    gap: 12,
+  },
+  emojiOption: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 25,
+  },
+  emojiOptionText: {
+    fontSize: 32,
   },
 });
 

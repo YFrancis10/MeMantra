@@ -52,4 +52,8 @@ router.delete(
 // Message routes
 router.post('/messages', validateRequest(sendMessageSchema), ChatController.sendMessage);
 
+// Message reaction routes
+router.post('/messages/:id/reactions', ChatController.addReaction);
+router.get('/messages/:id/reactions', ChatController.getReactions);
+
 export default router;

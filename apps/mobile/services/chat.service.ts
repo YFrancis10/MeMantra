@@ -4,6 +4,7 @@ import {
   Conversation,
   CreateMessagePayload,
   CreateConversationPayload,
+  MessageReaction,
 } from '../types/chat.types';
 
 const USE_MOCK_DATA = false; //Since backend is ready, I put it to false
@@ -165,6 +166,18 @@ const mockChatService = {
       setTimeout(() => resolve(), 200);
     });
   },
+
+  async addReaction(messageId: number, emoji: string, token: string): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(), 200);
+    });
+  },
+
+  async getReactions(messageId: number, token: string): Promise<MessageReaction[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve([]), 200);
+    });
+  },
 };
 
 /**
@@ -210,6 +223,23 @@ const realChatService = {
         headers: { Authorization: `Bearer ${token}` },
       },
     );
+  },
+
+  async addReaction(messageId: number, emoji: string, token: string): Promise<void> {
+    await apiClient.post(
+      `/chat/messages/${messageId}/reactions`,
+      { emoji },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+  },
+
+  async getReactions(messageId: number, token: string): Promise<MessageReaction[]> {
+    const response = await apiClient.get(`/chat/messages/${messageId}/reactions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.data.reactions;
   },
 };
 

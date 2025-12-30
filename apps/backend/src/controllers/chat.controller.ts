@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ConversationModel } from '../models/conversation.model';
 import { MessageModel } from '../models/message.model';
+import { MessageReactionModel } from '../models/messageReaction.model';
 import { UserModel } from '../models/user.model';
 
 export const ChatController = {
@@ -362,6 +363,128 @@ export const ChatController = {
       return res.status(500).json({
         status: 'error',
         message: 'Error deleting conversation',
+      });
+    }
+  },
+
+  // POST /api/chat/messages/:id/reactions - Add a reaction to a message
+  async addReaction(req: Request, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      const messageId = Number(req.params.id);
+      const { emoji } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
+      if (!emoji || typeof emoji !== 'string') {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Emoji is required',
+        });
+      }
+
+      // Verify message exists and get its conversation
+      const message = await MessageModel.findById(messageId);
+
+      if (!message) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Message not found',
+        });
+      }
+
+      
+      const isParticipant = await ConversationModel.isParticipant(message.conversation_id, userId);
+
+      if (!isParticipant) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Access denied',
+        });
+      }
+
+      
+      const exists = await MessageReactionModel.exists(messageId, userId, emoji);
+
+      if (exists) {
+        
+        await MessageReactionModel.delete(messageId, userId, emoji);
+        return res.status(200).json({
+          status: 'success',
+          message: 'Reaction removed',
+        });
+      }
+
+     
+      const reaction = await MessageReactionModel.create({
+        message_id: messageId,
+        user_id: userId,
+        emoji,
+      });
+
+      return res.status(201).json({
+        status: 'success',
+        message: 'Reaction added',
+        data: { reaction },
+      });
+    } catch (error) {
+      console.error('Add reaction error:', error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error adding reaction',
+      });
+    }
+  },
+
+  // GET /api/chat/messages/:id/reactions - Get all reactions for a message
+  async getReactions(req: Request, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      const messageId = Number(req.params.id);
+
+      if (!userId) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
+      // Verify message exists and get its conversation
+      const message = await MessageModel.findById(messageId);
+
+      if (!message) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Message not found',
+        });
+      }
+
+      // Check if user is participant in the conversation
+      const isParticipant = await ConversationModel.isParticipant(message.conversation_id, userId);
+
+      if (!isParticipant) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Access denied',
+        });
+      }
+
+      const reactions = await MessageReactionModel.getReactionCounts(messageId);
+
+      return res.status(200).json({
+        status: 'success',
+        data: { reactions },
+      });
+    } catch (error) {
+      console.error('Get reactions error:', error);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error retrieving reactions',
       });
     }
   },

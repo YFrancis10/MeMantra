@@ -45,7 +45,20 @@ export default function ConversationScreen({ route, navigation }: any) {
         conversation.conversation_id,
         token || 'mock-token',
       );
-      setMessages(data);
+
+      const messagesWithReactions = await Promise.all(
+        data.map(async (msg) => {
+          try {
+            const reactions = await chatService.getReactions(msg.message_id, token || 'mock-token');
+            return { ...msg, reactions };
+          } catch (err) {
+            console.error('Error loading reactions for message:', msg.message_id, err);
+            return { ...msg, reactions: [] };
+          }
+        }),
+      );
+
+      setMessages(messagesWithReactions);
 
       // Mark as read
       await chatService.markAsRead(conversation.conversation_id, token || 'mock-token');
@@ -93,6 +106,23 @@ export default function ConversationScreen({ route, navigation }: any) {
     return messages.find((m) => m.message_id === messageId) || null;
   };
 
+  const handleReaction = async (messageId: number, emoji: string) => {
+    try {
+      const token = await storage.getToken();
+      await chatService.addReaction(messageId, emoji, token || 'mock-token');
+
+      // Reload reactions for this message
+      const reactions = await chatService.getReactions(messageId, token || 'mock-token');
+
+      // Update the message with new reactions
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => (msg.message_id === messageId ? { ...msg, reactions } : msg)),
+      );
+    } catch (err) {
+      console.error('Error handling reaction:', err);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.primary }]}
@@ -121,6 +151,8 @@ export default function ConversationScreen({ route, navigation }: any) {
               isOwnMessage={item.sender_id === currentUserId}
               onLongPress={handleLongPress}
               replyToMessage={getReplyToMessage(item.reply_to_message_id)}
+              onReaction={handleReaction}
+              currentUserId={currentUserId}
             />
           )}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
