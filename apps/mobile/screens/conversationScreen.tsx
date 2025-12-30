@@ -92,7 +92,7 @@ export default function ConversationScreen({ route, navigation }: any) {
     }
   };
 
-  const handleLongPress = (message: Message) => {
+  const handleSwipeReply = (message: Message) => {
     // Allow replying to any message including shared mantras
     setReplyingTo(message);
   };
@@ -111,10 +111,8 @@ export default function ConversationScreen({ route, navigation }: any) {
       const token = await storage.getToken();
       await chatService.addReaction(messageId, emoji, token || 'mock-token');
 
-      // Reload reactions for this message
       const reactions = await chatService.getReactions(messageId, token || 'mock-token');
 
-      // Update the message with new reactions
       setMessages((prevMessages) =>
         prevMessages.map((msg) => (msg.message_id === messageId ? { ...msg, reactions } : msg)),
       );
@@ -149,7 +147,7 @@ export default function ConversationScreen({ route, navigation }: any) {
             <ChatBubble
               message={item}
               isOwnMessage={item.sender_id === currentUserId}
-              onLongPress={handleLongPress}
+              onSwipeReply={handleSwipeReply}
               replyToMessage={getReplyToMessage(item.reply_to_message_id)}
               onReaction={handleReaction}
               currentUserId={currentUserId}

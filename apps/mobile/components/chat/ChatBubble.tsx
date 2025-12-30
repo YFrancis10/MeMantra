@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../context/ThemeContext';
 import AppText from '../UI/textWrapper';
 import { useNavigation } from '@react-navigation/native';
@@ -8,18 +9,18 @@ import { Message, MessageReaction } from '../../types/chat.types';
 interface ChatBubbleProps {
   message: Message;
   isOwnMessage: boolean;
-  onLongPress?: (message: Message) => void;
+  onSwipeReply?: (message: Message) => void;
   replyToMessage?: Message | null;
   onReaction?: (messageId: number, emoji: string) => void;
   currentUserId?: number;
 }
 
-const EMOJI_OPTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+const EMOJI_OPTIONS = ['👍', '👎', '❤️', '😂', '😮', '😢', '🙏'];
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({
   message,
   isOwnMessage,
-  onLongPress,
+  onSwipeReply,
   replyToMessage,
   onReaction,
   currentUserId,
@@ -27,6 +28,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   const { colors } = useTheme();
   const navigation = useNavigation<any>();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const swipeableRef = useRef<Swipeable>(null);
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -44,8 +46,15 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
     setShowEmojiPicker(false);
   };
 
-  const handleBubblePress = () => {
+  const handleLongPress = () => {
     setShowEmojiPicker(true);
+  };
+
+  const handleSwipeRight = () => {
+    if (onSwipeReply) {
+      onSwipeReply(message);
+    }
+    setTimeout(() => swipeableRef.current?.close(), 0);
   };
 
   const renderReactions = () => {
@@ -87,7 +96,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
         })}
         <TouchableOpacity
           style={[styles.reactionBubble, { backgroundColor: `${colors.primaryDark}15` }]}
-          onPress={handleBubblePress}
+          onPress={handleLongPress}
           activeOpacity={0.7}
         >
           <AppText style={styles.addReactionText}>+</AppText>
@@ -133,11 +142,119 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
     parsed = null;
   }
 
+  const renderLeftActions = () => (
+    <View style={styles.swipeActionContainer}>
+      <AppText style={styles.swipeActionText}>Reply</AppText>
+    </View>
+  );
+
   //
   if (parsed?.type === 'mantra_share') {
     return (
       <>
         {renderEmojiPicker()}
+        <Swipeable
+          ref={swipeableRef}
+          renderLeftActions={renderLeftActions}
+          onSwipeableWillOpen={handleSwipeRight}
+          overshootLeft={false}
+        >
+          <View
+            style={[
+              styles.container,
+              isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer,
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('MainApp', {
+                  screen: 'Home',
+                  params: { returnToMantraId: parsed.mantra_id },
+                })
+              }
+              onLongPress={handleLongPress}
+              activeOpacity={0.85}
+              style={[
+                styles.bubble,
+                styles.mantraBubble,
+                {
+                  backgroundColor: colors.secondary,
+                },
+              ]}
+            >
+              {/* Show reply context if this is a reply */}
+              {replyToMessage &&
+                (() => {
+                  let replyParsed: any = null;
+                  try {
+                    replyParsed = JSON.parse(replyToMessage.content);
+                  } catch {
+                    replyParsed = null;
+                  }
+
+                  const isReplyToMantra = replyParsed?.type === 'mantra_share';
+                  const replyDisplayText = isReplyToMantra
+                    ? `🧘 ${replyParsed.text ?? 'Shared mantra'}`
+                    : replyToMessage.content;
+
+                  return (
+                    <View
+                      style={[
+                        styles.replyContainer,
+                        {
+                          backgroundColor: `${colors.primaryDark}20`,
+                          borderLeftColor: colors.primaryDark,
+                        },
+                      ]}
+                    >
+                      <AppText
+                        style={[
+                          styles.replyText,
+                          {
+                            color: colors.primaryDark,
+                          },
+                        ]}
+                        numberOfLines={2}
+                      >
+                        {replyDisplayText}
+                      </AppText>
+                    </View>
+                  );
+                })()}
+
+              <AppText style={[styles.mantraLabel, { color: colors.primaryDark }]}>
+                {isOwnMessage ? 'You shared a mantra' : 'Shared a mantra'}
+              </AppText>
+
+              <AppText style={[styles.mantraTitle, { color: colors.primaryDark }]}>
+                “{parsed.text ?? 'Open mantra'}”
+              </AppText>
+
+              <AppText style={[styles.mantraCTA, { color: colors.primaryDark }]}>
+                Tap to view
+              </AppText>
+
+              <AppText style={[styles.timestamp, { color: `${colors.primaryDark}99` }]}>
+                {formatTime(created_at)}
+              </AppText>
+            </TouchableOpacity>
+            {renderReactions()}
+          </View>
+        </Swipeable>
+      </>
+    );
+  }
+
+  //text message
+  return (
+    <>
+      {renderEmojiPicker()}
+      <Swipeable
+        ref={swipeableRef}
+        renderLeftActions={renderLeftActions}
+        onSwipeableWillOpen={handleSwipeRight}
+        overshootLeft={false}
+      >
         <View
           style={[
             styles.container,
@@ -145,22 +262,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
           ]}
         >
           <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('MainApp', {
-                screen: 'Home',
-                params: { returnToMantraId: parsed.mantra_id },
-              })
-            }
-            onLongPress={() => {
-              onLongPress && onLongPress(message);
-              handleBubblePress();
-            }}
-            activeOpacity={0.85}
+            activeOpacity={0.9}
+            onLongPress={handleLongPress}
             style={[
               styles.bubble,
-              styles.mantraBubble,
               {
-                backgroundColor: colors.secondary,
+                backgroundColor: isOwnMessage ? colors.secondary : colors.primaryDark,
               },
             ]}
           >
@@ -176,7 +283,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
 
                 const isReplyToMantra = replyParsed?.type === 'mantra_share';
                 const replyDisplayText = isReplyToMantra
-                  ? `🧘 ${replyParsed.text ?? 'Shared mantra'}`
+                  ? ` ${replyParsed.text ?? 'Shared mantra'}`
                   : replyToMessage.content;
 
                 return (
@@ -184,8 +291,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                     style={[
                       styles.replyContainer,
                       {
-                        backgroundColor: `${colors.primaryDark}20`,
-                        borderLeftColor: colors.primaryDark,
+                        backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
+                        borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
                       },
                     ]}
                   >
@@ -193,7 +300,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                       style={[
                         styles.replyText,
                         {
-                          color: colors.primaryDark,
+                          color: isOwnMessage ? colors.primaryDark : '#ffffff',
                         },
                       ]}
                       numberOfLines={2}
@@ -204,110 +311,30 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                 );
               })()}
 
-            <AppText style={[styles.mantraLabel, { color: colors.primaryDark }]}>
-              {isOwnMessage ? 'You shared a mantra' : 'Shared a mantra'}
+            <AppText
+              style={[
+                styles.messageText,
+                {
+                  color: isOwnMessage ? colors.primaryDark : '#ffffff',
+                },
+              ]}
+            >
+              {content}
             </AppText>
-
-            <AppText style={[styles.mantraTitle, { color: colors.primaryDark }]}>
-              “{parsed.text ?? 'Open mantra'}”
-            </AppText>
-
-            <AppText style={[styles.mantraCTA, { color: colors.primaryDark }]}>Tap to view</AppText>
-
-            <AppText style={[styles.timestamp, { color: `${colors.primaryDark}99` }]}>
+            <AppText
+              style={[
+                styles.timestamp,
+                {
+                  color: isOwnMessage ? `${colors.primaryDark}99` : '#ffffff99',
+                },
+              ]}
+            >
               {formatTime(created_at)}
             </AppText>
           </TouchableOpacity>
           {renderReactions()}
         </View>
-      </>
-    );
-  }
-
-  //text message
-  return (
-    <>
-      {renderEmojiPicker()}
-      <View
-        style={[
-          styles.container,
-          isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer,
-        ]}
-      >
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onLongPress={() => onLongPress && onLongPress(message)}
-          onPress={handleBubblePress}
-          style={[
-            styles.bubble,
-            {
-              backgroundColor: isOwnMessage ? colors.secondary : colors.primaryDark,
-            },
-          ]}
-        >
-          {/* Show reply context if this is a reply */}
-          {replyToMessage &&
-            (() => {
-              let replyParsed: any = null;
-              try {
-                replyParsed = JSON.parse(replyToMessage.content);
-              } catch {
-                replyParsed = null;
-              }
-
-              const isReplyToMantra = replyParsed?.type === 'mantra_share';
-              const replyDisplayText = isReplyToMantra
-                ? ` ${replyParsed.text ?? 'Shared mantra'}`
-                : replyToMessage.content;
-
-              return (
-                <View
-                  style={[
-                    styles.replyContainer,
-                    {
-                      backgroundColor: isOwnMessage ? `${colors.primaryDark}20` : '#ffffff20',
-                      borderLeftColor: isOwnMessage ? colors.primaryDark : '#ffffff',
-                    },
-                  ]}
-                >
-                  <AppText
-                    style={[
-                      styles.replyText,
-                      {
-                        color: isOwnMessage ? colors.primaryDark : '#ffffff',
-                      },
-                    ]}
-                    numberOfLines={2}
-                  >
-                    {replyDisplayText}
-                  </AppText>
-                </View>
-              );
-            })()}
-
-          <AppText
-            style={[
-              styles.messageText,
-              {
-                color: isOwnMessage ? colors.primaryDark : '#ffffff',
-              },
-            ]}
-          >
-            {content}
-          </AppText>
-          <AppText
-            style={[
-              styles.timestamp,
-              {
-                color: isOwnMessage ? `${colors.primaryDark}99` : '#ffffff99',
-              },
-            ]}
-          >
-            {formatTime(created_at)}
-          </AppText>
-        </TouchableOpacity>
-        {renderReactions()}
-      </View>
+      </Swipeable>
     </>
   );
 };
@@ -445,6 +472,16 @@ const styles = StyleSheet.create({
   },
   emojiOptionText: {
     fontSize: 32,
+  },
+  swipeActionContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 4,
+  },
+  swipeActionText: {
+    fontSize: 14,
+    opacity: 0.6,
   },
 });
 
