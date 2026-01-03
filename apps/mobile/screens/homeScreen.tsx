@@ -21,6 +21,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSavedMantras } from '../context/SavedContext';
 import SavedPopupBar from '../components/UI/savedPopupBar';
 import CollectionsSheet from '../components/collectionsSheet';
+import { likeService } from '../services/like.service';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -79,9 +80,9 @@ export default function HomeScreen({ navigation }: any) {
       );
 
       if (isCurrentlyLiked) {
-        await mantraService.unlikeMantra(mantraId, token);
+        await likeService.unlikeMantra(mantraId, token);
       } else {
-        await mantraService.likeMantra(mantraId, token);
+        await likeService.likeMantra(mantraId, token);
       }
     } catch (err) {
       console.error('Error toggling like:', err);
